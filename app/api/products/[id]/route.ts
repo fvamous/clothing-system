@@ -29,7 +29,7 @@ export async function GET(
 ) {
   const { id } = await context.params;
 
-  const productId = Number(id);
+  const productId = id; // ✅ UUID (NO Number)
 
   const product = await prisma.product.findFirst({
     where: {
@@ -51,11 +51,14 @@ export async function PUT(
   const guard = await requireAdmin();
 
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.error }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.error },
+      { status: guard.status }
+    );
   }
 
   const { id } = await context.params;
-  const productId = Number(id);
+  const productId = id; // ✅ UUID
 
   const body = await req.json();
 
@@ -63,7 +66,7 @@ export async function PUT(
     where: { id: productId },
     data: {
       name: body.name,
-      price: Number(body.price),
+      price: Number(body.price), // tetap aman
       stock: Number(body.stock ?? 0),
       imageUrl: body.imageUrl ?? null,
       description: body.description ?? null,
@@ -83,11 +86,14 @@ export async function DELETE(
   const guard = await requireAdmin();
 
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.error }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.error },
+      { status: guard.status }
+    );
   }
 
   const { id } = await context.params;
-  const productId = Number(id);
+  const productId = id; // ✅ UUID
 
   await prisma.product.update({
     where: { id: productId },

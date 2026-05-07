@@ -8,21 +8,34 @@ export default function EditProductPage() {
   const params = useParams();
   const id = params.id as string;
 
+  // =========================
+  // FORM STATE
+  // =========================
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+
+  const [category, setCategory] = useState("");
+  const [color, setColor] = useState("");
+  const [material, setMaterial] = useState("");
+  const [stock, setStock] = useState("");
+  const [description, setDescription] = useState("");
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
 
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-
   const [submitting, setSubmitting] = useState(false);
 
+  // =========================
+  // MODALS
+  // =========================
   const [modal, setModal] = useState({
     open: false,
     message: "",
   });
+
+  const [successModal, setSuccessModal] = useState(false);
 
   // =========================
   // FETCH PRODUCT
@@ -37,16 +50,23 @@ export default function EditProductPage() {
 
         if (ignore) return;
 
-        setName(data?.name ?? "");
-        setPrice(data?.price?.toString() ?? "");
+        if (!res.ok) {
+          throw new Error(data?.error || "Failed load product");
+        }
 
-        // 🔥 FIX: always safe string
+        setName(data?.name || "");
+        setPrice(String(data?.price || ""));
+        setCategory(data?.categoryId || "");
+        setColor(data?.color || "");
+        setMaterial(data?.material || "");
+        setStock(String(data?.stock || 0));
+        setDescription(data?.description || "");
         setPreview(data?.imageUrl || "");
-      } catch {
+      } catch (err: any) {
         if (!ignore) {
           setModal({
             open: true,
-            message: "Failed to load product",
+            message: err.message || "Failed to load product",
           });
         }
       }
@@ -72,12 +92,11 @@ export default function EditProductPage() {
       URL.revokeObjectURL(preview);
     }
 
-    const url = URL.createObjectURL(f);
-    setPreview(url);
+    setPreview(URL.createObjectURL(f));
   }
 
   // =========================
-  // UPLOAD
+  // UPLOAD IMAGE
   // =========================
   async function uploadFile(file: File) {
     setUploading(true);
@@ -111,17 +130,16 @@ export default function EditProductPage() {
   }
 
   // =========================
-  // SUBMIT
+  // SUBMIT UPDATE
   // =========================
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (submitting) return;
-
     setSubmitting(true);
 
     try {
-      let imageUrl = preview || ""; // safe fallback
+      let imageUrl = preview;
 
       if (file) {
         imageUrl = await uploadFile(file);
@@ -135,6 +153,11 @@ export default function EditProductPage() {
         body: JSON.stringify({
           name,
           price: Number(price) || 0,
+          stock: Number(stock) || 0,
+          category,
+          color,
+          material,
+          description,
           imageUrl,
         }),
       });
@@ -142,18 +165,24 @@ export default function EditProductPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setModal({
-          open: true,
-          message: data?.error || "Update failed",
-        });
-        return;
+        throw new Error(data?.error || "Update failed");
       }
 
-      router.push("/admin/products");
-    } catch {
+      // =========================
+      // SUCCESS POPUP
+      // =========================
+      setSuccessModal(true);
+
+      setTimeout(() => {
+        setSuccessModal(false);
+        router.push("/admin/products");
+        router.refresh();
+      }, 1200);
+
+    } catch (err: any) {
       setModal({
         open: true,
-        message: "Unexpected error",
+        message: err.message || "Unexpected error",
       });
     } finally {
       setSubmitting(false);
@@ -162,22 +191,11 @@ export default function EditProductPage() {
 
   return (
     <main style={styles.page}>
-      <div style={styles.card}>
-        <h1>Edit Product</h1>
+      <div style={styles.modal}>
+        <h1 style={styles.title}>Edit Product</h1>
 
-        {/* IMAGE */}
-        {preview && (
-          <img
-            src={preview}
-            style={styles.image}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src =
-                "/placeholder.png";
-            }}
-          />
-        )}
+        {preview && <img src={preview} style={styles.preview} />}
 
-        {/* PROGRESS */}
         {uploading && (
           <div style={styles.progressWrap}>
             <div
@@ -190,68 +208,90 @@ export default function EditProductPage() {
         )}
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name"
-            style={styles.input}
-          />
+          <div style={styles.grid}>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Product name" style={styles.input} />
+            <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Category" style={styles.input} />
+            <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color" style={styles.input} />
+            <input value={material} onChange={(e) => setMaterial(e.target.value)} placeholder="Material" style={styles.input} />
+            <input value={stock} onChange={(e) => setStock(e.target.value)} placeholder="Stock" type="number" style={styles.input} />
+            <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price" type="number" style={styles.input} />
+          </div>
 
-          <input
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="Price"
-            type="number"
-            style={styles.input}
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description"
+            style={styles.textarea}
           />
 
           <input type="file" accept="image/*" onChange={handleFile} />
 
           <button disabled={uploading || submitting} style={styles.button}>
-            {submitting ? "Saving..." : uploading ? "Uploading..." : "Save"}
+            {submitting ? "Saving..." : uploading ? "Uploading..." : "Save Product"}
           </button>
         </form>
       </div>
 
-      {/* MODAL */}
+      {/* ERROR MODAL */}
       {modal.open && (
         <div style={styles.overlay}>
-          <div style={styles.modal}>
+          <div style={styles.modalBox}>
             <p>{modal.message}</p>
-            <button
-              onClick={() => setModal({ open: false, message: "" })}
-              style={styles.modalBtn}
-            >
+            <button onClick={() => setModal({ open: false, message: "" })} style={styles.closeBtn}>
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* SUCCESS POPUP */}
+      {successModal && (
+        <div style={styles.successOverlay}>
+          <div style={styles.successBox}>
+            <div style={{ fontSize: 40 }}>✅</div>
+            <p style={{ fontWeight: 600 }}>Produk berhasil disimpan</p>
           </div>
         </div>
       )}
     </main>
   );
 }
+
+/* =========================
+   STYLES
+========================= */
 const styles: Record<string, React.CSSProperties> = {
   page: {
-    padding: "2rem",
+    minHeight: "100vh",
     display: "flex",
     justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+    background: "#f4f6f8",
   },
 
-  card: {
+  modal: {
     width: "100%",
-    maxWidth: 520,
+    maxWidth: 640,
     background: "#fff",
-    padding: 20,
-    borderRadius: 14,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+    borderRadius: 24,
+    padding: 24,
+    boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
   },
 
-  image: {
+  title: {
+    fontSize: 22,
+    fontWeight: 700,
+  },
+
+  preview: {
     width: "100%",
-    height: 220,
+    height: 260,
     objectFit: "cover",
-    borderRadius: 10,
-    marginBottom: 12,
+    borderRadius: 16,
   },
 
   form: {
@@ -260,15 +300,28 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
   },
 
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 10,
+  },
+
   input: {
-    padding: 10,
-    borderRadius: 8,
+    padding: 12,
+    borderRadius: 12,
+    border: "1px solid #ddd",
+  },
+
+  textarea: {
+    minHeight: 120,
+    padding: 12,
+    borderRadius: 12,
     border: "1px solid #ddd",
   },
 
   button: {
-    padding: 12,
-    borderRadius: 10,
+    padding: 14,
+    borderRadius: 14,
     border: "none",
     background: "#111",
     color: "#fff",
@@ -279,7 +332,6 @@ const styles: Record<string, React.CSSProperties> = {
     height: 6,
     background: "#eee",
     borderRadius: 999,
-    marginBottom: 10,
     overflow: "hidden",
   },
 
@@ -294,26 +346,42 @@ const styles: Record<string, React.CSSProperties> = {
     inset: 0,
     background: "rgba(0,0,0,0.4)",
     display: "flex",
-    alignItems: "center",
     justifyContent: "center",
-    backdropFilter: "blur(6px)",
-    zIndex: 9999,
+    alignItems: "center",
   },
 
-  modal: {
+  modalBox: {
     background: "#fff",
     padding: 20,
     borderRadius: 12,
     width: 320,
   },
 
-  modalBtn: {
+  closeBtn: {
     marginTop: 12,
     padding: 10,
     border: "none",
     borderRadius: 8,
     background: "#111",
     color: "#fff",
-    cursor: "pointer",
+  },
+
+  // ✅ FIXED HERE (INI YANG SEBELUMNYA ERROR)
+  successOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.4)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+  },
+
+  successBox: {
+    background: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    textAlign: "center",
+    width: 260,
   },
 };

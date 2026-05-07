@@ -1,31 +1,36 @@
 import { openrouter } from "@/lib/ai/openrouter";
 
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  const message =
-    body?.data?.message?.conversation || "";
+    const message =
+      body?.data?.message?.conversation || "";
 
-  const ai = await openrouter.chat.completions.create({
-    model: "openai/gpt-4.1-mini",
-    messages: [
+    const reply = await openrouter.call([
       {
         role: "system",
-        content:
-          "Kamu customer service toko fashion.",
+        content: "Kamu customer service toko fashion profesional.",
       },
       {
         role: "user",
         content: message,
       },
-    ],
-  });
+    ]);
 
-  const reply = ai.choices[0].message.content;
+    // TODO: kirim ke WhatsApp API
 
-  // kirim balik ke whatsapp
-
-  return Response.json({
-    success: true,
-  });
+    return Response.json({
+      success: true,
+      reply,
+    });
+  } catch (err: any) {
+    return Response.json(
+      {
+        success: false,
+        error: err?.message || "Webhook error",
+      },
+      { status: 500 }
+    );
+  }
 }

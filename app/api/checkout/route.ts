@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 type CheckoutItem = {
-  productId: number;
+  productId: string;
   quantity: number;
 };
 
@@ -14,24 +14,59 @@ export async function POST(req: Request) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: "Unauthorized (no session)" },
         { status: 401 }
       );
     }
 
     const body = await req.json().catch(() => null);
 
-    if (!body?.items || !Array.isArray(body.items)) {
+    // 🔥 DEBUG FRIENDLY VALIDATION
+    if (!body) {
       return NextResponse.json(
-        { success: false, error: "Invalid payload" },
+        { success: false, error: "Empty request body" },
+        { status: 400 }
+      );
+    }
+
+    if (!Array.isArray(body.items)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "items must be an array",
+          received: body,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (body.items.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Cart is empty" },
         { status: 400 }
       );
     }
 
     const items: CheckoutItem[] = body.items.map((i: any) => ({
-      productId: Number(i.productId),
-      quantity: Number(i.quantity),
+      productId: String(i.productId || ""),
+      quantity: Number(i.quantity || 0),
     }));
+
+    // 🔥 HARD VALIDATION
+    const invalidItem = items.find(
+      (i) => !i.productId || i.quantity <= 0
+    );
+
+    if (invalidItem) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid cart item detected",
+          item: invalidItem,
+        },
+        { status: 400 }
+      );
+    }
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -39,7 +74,7 @@ export async function POST(req: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "User not found" },
+        { success: false, error: "User not found in DB" },
         { status: 404 }
       );
     }
@@ -50,16 +85,29 @@ export async function POST(req: Request) {
       },
     });
 
+    if (products.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Products not found" },
+        { status: 400 }
+      );
+    }
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
     let total = 0;
 
+    // =========================
+    // VALIDATION PHASE
+    // =========================
     for (const item of items) {
-      const product = products.find(
-        (p) => p.id === item.productId
-      );
+      const product = productMap.get(item.productId);
 
       if (!product) {
         return NextResponse.json(
-          { success: false, error: "Product not found" },
+          {
+            success: false,
+            error: `Product not found: ${item.productId}`,
+          },
           { status: 400 }
         );
       }
@@ -77,6 +125,9 @@ export async function POST(req: Request) {
       total += product.price * item.quantity;
     }
 
+    // =========================
+    // TRANSACTION PHASE
+    // =========================
     const order = await prisma.$transaction(async (tx) => {
       const createdOrder = await tx.order.create({
         data: {
@@ -85,18 +136,14 @@ export async function POST(req: Request) {
           status: "PENDING",
           items: {
             create: items.map((item) => {
-              const product = products.find(
-                (p) => p.id === item.productId
-              );
-
-              if (!product) {
-                throw new Error("Product mapping failed");
-              }
+              const product = productMap.get(item.productId)!;
 
               return {
                 productId: product.id,
                 quantity: item.quantity,
                 price: product.price,
+                productName: product.name,
+                subtotal: product.price * item.quantity,
               };
             }),
           },
@@ -104,32 +151,23 @@ export async function POST(req: Request) {
         include: { items: true },
       });
 
-          for (const item of items) {
-      const updated =
-        await tx.product.updateMany({
+      for (const item of items) {
+        const updated = await tx.product.updateMany({
           where: {
             id: item.productId,
-            stock: {
-              gte: item.quantity,
-            },
+            stock: { gte: item.quantity },
           },
-
           data: {
-            stock: {
-              decrement: item.quantity,
-            },
+            stock: { decrement: item.quantity },
           },
         });
 
-  // ===================================
-  // STOCK FAILED / RACE CONDITION
-  // ===================================
-  if (updated.count === 0) {
-    throw new Error(
-      "Stock changed, checkout failed"
-    );
-  }
-}
+        if (updated.count === 0) {
+          throw new Error(
+            "Stock conflict detected during checkout"
+          );
+        }
+      }
 
       return createdOrder;
     });

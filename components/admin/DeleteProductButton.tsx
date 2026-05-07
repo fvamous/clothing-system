@@ -5,7 +5,7 @@ import { useState } from "react";
 export default function DeleteProductButton({
   productId,
 }: {
-  productId: number;
+  productId: string;
 }) {
   const [loading, setLoading] = useState(false);
 

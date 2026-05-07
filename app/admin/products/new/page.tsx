@@ -9,36 +9,32 @@ export default function NewProductPage() {
 
   const router = useRouter();
 
-  // BASIC
+  // =========================
+  // FORM STATE
+  // =========================
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
 
-  // AI FIELDS
   const [category, setCategory] = useState("");
   const [color, setColor] = useState("");
   const [material, setMaterial] = useState("");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
 
-  // IMAGE
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
 
-  // STATES
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
 
   // =========================
-  // AI IMAGE ANALYZE (FIXED SAFE VERSION)
+  // AI IMAGE ANALYZE
   // =========================
   async function handleAnalyzeImage(imageBase64: string) {
     try {
       setGenerating(true);
       setError("");
-
-      if (!imageBase64) return;
 
       const res = await fetch("/api/ai/vision-product", {
         method: "POST",
@@ -46,13 +42,10 @@ export default function NewProductPage() {
         body: JSON.stringify({ image: imageBase64 }),
       });
 
-      if (!res.ok) {
-        throw new Error("AI image analyze failed");
-      }
+      if (!res.ok) throw new Error("AI image analyze failed");
 
       const data = await res.json();
 
-      // ✅ SAFE PARSE (anti crash JSON / markdown)
       let parsed: any = null;
 
       try {
@@ -60,23 +53,19 @@ export default function NewProductPage() {
           typeof data.result === "string"
             ? JSON.parse(data.result)
             : data.result;
-      } catch (e) {
-        console.warn("AI returned invalid JSON:", data.result);
+      } catch {
         return;
       }
 
-      // optional safe assign (tidak overwrite kalau kosong)
       if (parsed?.name) setName(parsed.name);
       if (parsed?.category) setCategory(parsed.category);
       if (parsed?.color) setColor(parsed.color);
       if (parsed?.material) setMaterial(parsed.material);
 
-      // description hanya isi kalau masih kosong
       if (!description && parsed?.description) {
         setDescription(parsed.description);
       }
     } catch (err: any) {
-      console.error(err);
       setError(err.message || "AI error");
     } finally {
       setGenerating(false);
@@ -84,14 +73,14 @@ export default function NewProductPage() {
   }
 
   // =========================
-  // HANDLE FILE (TIDAK DIUBAH LOGIC UI)
+  // FILE HANDLER
   // =========================
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
 
     if (!f.type.startsWith("image/")) {
-      setError("Only image files allowed");
+      setError("Only image allowed");
       return;
     }
 
@@ -102,8 +91,6 @@ export default function NewProductPage() {
     reader.onload = async () => {
       const result = reader.result as string;
       setPreview(result);
-
-      // AI analyze tetap jalan tapi sekarang sudah safe
       await handleAnalyzeImage(result);
     };
 
@@ -111,7 +98,7 @@ export default function NewProductPage() {
   }
 
   // =========================
-  // AI DESCRIPTION (SAFE VERSION)
+  // GENERATE DESCRIPTION
   // =========================
   async function handleGenerateAI() {
     try {
@@ -134,18 +121,15 @@ export default function NewProductPage() {
         }),
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to generate description");
-      }
+      if (!res.ok) throw new Error("Failed generate description");
 
       const data = await res.json();
 
-      // safe set (anti undefined / object crash)
-      if (typeof data.result === "string") {
-        setDescription(data.result);
-      } else {
-        setDescription(JSON.stringify(data.result));
-      }
+      setDescription(
+        typeof data.result === "string"
+          ? data.result
+          : JSON.stringify(data.result)
+      );
     } catch (err: any) {
       setError(err.message || "AI error");
     } finally {
@@ -154,11 +138,10 @@ export default function NewProductPage() {
   }
 
   // =========================
-  // SUBMIT (TIDAK DIUBAH)
+  // SUBMIT PRODUCT
   // =========================
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
 
     if (!name || !price) {
       setError("Name and price required");
@@ -168,10 +151,28 @@ export default function NewProductPage() {
     try {
       setSaving(true);
 
-      // TODO: API save product
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          price: Number(price),
+          stock: Number(stock),
+          category,
+          color,
+          material,
+          description,
+          imageUrl: preview,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data?.error || "Failed save product");
+
       router.push("/admin/products");
     } catch (err: any) {
-      setError(err.message || "Failed to save");
+      setError(err.message || "Failed save");
     } finally {
       setSaving(false);
     }
@@ -179,103 +180,47 @@ export default function NewProductPage() {
 
   return (
     <main style={styles.page}>
-      <div style={styles.modal}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Create Product</h1>
-          <p style={styles.subtitle}>
-            Add product details or generate from AI image analysis
-          </p>
-        </div>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Create Product</h1>
 
         {error && <div style={styles.error}>{error}</div>}
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          {/* IMAGE UPLOAD */}
-          <label style={styles.uploadBox}>
-            <input type="file" hidden onChange={handleFile} />
+        {/* IMAGE */}
+        <label style={styles.uploadBox}>
+          <input type="file" hidden onChange={handleFile} />
 
-            {preview ? (
-              <img src={preview} style={styles.preview} />
-            ) : (
-              <div style={styles.placeholder}>📷 Upload product image</div>
-            )}
-          </label>
-
-          {generating && (
-            <div style={styles.info}>🤖 AI analyzing image...</div>
+          {preview ? (
+            <img src={preview} style={styles.preview} />
+          ) : (
+            <div style={styles.placeholder}>Upload image</div>
           )}
+        </label>
 
-          {/* INPUT GRID */}
+        {generating && <p style={styles.info}>AI processing...</p>}
+
+        {/* FORM */}
+        <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.grid}>
-            <input
-              placeholder="Product name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={styles.input}
-            />
-
-            <input
-              placeholder="Category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              style={styles.input}
-            />
-
-            <input
-              placeholder="Color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              style={styles.input}
-            />
-
-            <input
-              placeholder="Material"
-              value={material}
-              onChange={(e) => setMaterial(e.target.value)}
-              style={styles.input}
-            />
-
-            <input
-              placeholder="Stock"
-              type="number"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              style={styles.input}
-            />
-
-            <input
-              placeholder="Price"
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              style={styles.input}
-            />
-          </div>
-
-          {/* AI BUTTON */}
-          <div style={styles.aiRow}>
-            <button
-              type="button"
-              onClick={handleGenerateAI}
-              disabled={generating}
-              style={styles.aiButton}
-            >
-              ✨ Generate Description
-            </button>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" style={styles.input} />
+            <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Category" style={styles.input} />
+            <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color" style={styles.input} />
+            <input value={material} onChange={(e) => setMaterial(e.target.value)} placeholder="Material" style={styles.input} />
+            <input value={stock} onChange={(e) => setStock(e.target.value)} placeholder="Stock" type="number" style={styles.input} />
+            <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price" type="number" style={styles.input} />
           </div>
 
           <textarea
-            placeholder="Description..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description"
             style={styles.textarea}
           />
 
-          <button
-            type="submit"
-            disabled={saving || generating}
-            style={styles.button}
-          >
+          <button type="button" onClick={handleGenerateAI} style={styles.aiBtn}>
+            Generate Description
+          </button>
+
+          <button disabled={saving || generating} style={styles.button}>
             {saving ? "Saving..." : "Save Product"}
           </button>
         </form>
@@ -284,6 +229,9 @@ export default function NewProductPage() {
   );
 }
 
+/* =========================
+   SHOPIFY-STYLE MODAL UI
+========================= */
 const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: "100vh",
@@ -293,19 +241,29 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 24,
     background: "#f4f6f8",
   },
-  modal: {
+
+  card: {
     width: "100%",
-    maxWidth: 640,
+    maxWidth: 680,
     background: "#fff",
     borderRadius: 24,
     padding: 24,
     boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
   },
-  header: { marginBottom: 16 },
-  title: { fontSize: 22, fontWeight: 700 },
-  subtitle: { fontSize: 13, color: "#666" },
 
-  form: { display: "flex", flexDirection: "column", gap: 14 },
+  title: {
+    fontSize: 22,
+    fontWeight: 700,
+  },
+
+  error: {
+    background: "#ffe5e5",
+    padding: 10,
+    borderRadius: 10,
+  },
 
   uploadBox: {
     border: "2px dashed #ddd",
@@ -314,9 +272,23 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
 
-  preview: { width: "100%", height: 260, objectFit: "cover" },
+  preview: {
+    width: "100%",
+    height: 260,
+    objectFit: "cover",
+  },
 
-  placeholder: { padding: 40, textAlign: "center", color: "#888" },
+  placeholder: {
+    padding: 50,
+    textAlign: "center",
+    color: "#888",
+  },
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  },
 
   grid: {
     display: "grid",
@@ -326,42 +298,36 @@ const styles: Record<string, React.CSSProperties> = {
 
   input: {
     padding: 12,
-    border: "1px solid #e5e5e5",
     borderRadius: 12,
+    border: "1px solid #ddd",
   },
 
   textarea: {
-    minHeight: 140,
+    minHeight: 120,
     padding: 12,
-    border: "1px solid #e5e5e5",
     borderRadius: 12,
+    border: "1px solid #ddd",
   },
 
-  aiRow: { display: "flex", justifyContent: "flex-end" },
-
-  aiButton: {
-    padding: "10px 14px",
-    borderRadius: 10,
-    border: "1px solid #ddd",
-    background: "#f9f9f9",
+  aiBtn: {
+    padding: 10,
+    borderRadius: 12,
+    border: "1px solid #ccc",
+    background: "#f8f8f8",
     cursor: "pointer",
   },
 
   button: {
     padding: 14,
     borderRadius: 14,
+    border: "none",
     background: "#111",
     color: "#fff",
-    border: "none",
     cursor: "pointer",
   },
 
-  error: {
-    background: "#ffe5e5",
-    color: "#c00",
-    padding: 10,
-    borderRadius: 10,
+  info: {
+    fontSize: 13,
+    color: "#666",
   },
-
-  info: { fontSize: 13, color: "#666" },
 };

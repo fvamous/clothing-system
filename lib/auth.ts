@@ -1,11 +1,7 @@
-import { type NextAuthOptions } from "next-auth";
-
+import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-
 import { prisma } from "@/lib/prisma";
-
 import { Role } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
@@ -13,11 +9,8 @@ export const authOptions: NextAuthOptions = {
 
   providers: [
     GoogleProvider({
-      clientId:
-        process.env.GOOGLE_CLIENT_ID!,
-
-      clientSecret:
-        process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
 
@@ -27,44 +20,33 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
-      // =========================
-      // ALWAYS REFRESH ROLE
-      // =========================
-      if (token.email) {
-        const dbUser =
-          await prisma.user.findUnique({
-            where: {
-              email: token.email,
-            },
-          });
+      if (user) {
+        token.id = user.id;
+      }
+
+      if (token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+        });
 
         if (dbUser) {
-          token.id = dbUser.id;
-
-          token.role =
-            dbUser.role ?? Role.USER;
+          token.role = dbUser.role;
+          token.email = dbUser.email;
         }
       }
 
       return token;
     },
 
-    async session({
-      session,
-      token,
-    }) {
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id =
-          token.id as string;
-
-        session.user.role =
-          token.role as Role;
+        session.user.id = token.id as string;
+        session.user.role = token.role as Role;
       }
 
       return session;
     },
   },
 
-  secret:
-    process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
 };

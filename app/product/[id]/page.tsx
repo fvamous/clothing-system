@@ -1,24 +1,43 @@
 import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
 
-export default async function ProductPage({
+async function getOrder(id: string) {
+  return prisma.order.findUnique({
+    where: { id }, // ✅ string UUID
+    include: {
+      items: {
+        include: { product: true },
+      },
+    },
+  });
+}
+
+export default async function SuccessPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = await params;
+  const { id } = params;
 
-  const product = await prisma.product.findUnique({
-    where: { id: Number(id) },
-  });
+  const order = await getOrder(id);
 
-  if (!product) {
-    return <div style={{ padding: 20 }}>Product not found</div>;
-  }
+  if (!order) return notFound();
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>{product.name}</h1>
-      <p>Rp {product.price.toLocaleString()}</p>
+      <h1>Order Success 🎉</h1>
+
+      <p>ID Order: {order.id}</p>
+      <p>Status: {order.status}</p>
+      <p>Total: Rp {order.total}</p>
+
+      <h3>Items:</h3>
+
+      {order.items.map((item: any) => (
+        <div key={item.id}>
+          {item.product?.name} x {item.quantity}
+        </div>
+      ))}
     </div>
   );
 }

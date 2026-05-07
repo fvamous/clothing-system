@@ -8,21 +8,17 @@ import DeleteProductButton from "@/components/admin/DeleteProductButton";
 export default async function ProductsAdminPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user) redirect("/");
-  if (session.user.role !== "ADMIN") redirect("/");
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect("/");
+  }
 
   const products = await prisma.product.findMany({
-    where: {
-      isDeleted: false, // 🔥 IMPORTANT (SOFT DELETE SUPPORT)
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+    where: { isDeleted: false },
+    orderBy: { createdAt: "desc" },
   });
 
   return (
     <main style={styles.page}>
-      {/* HEADER */}
       <div style={styles.header}>
         <div>
           <h1 style={styles.title}>Products</h1>
@@ -34,37 +30,28 @@ export default async function ProductsAdminPage() {
         </Link>
       </div>
 
-      {/* GRID */}
       <div style={styles.grid}>
-        {products.map((product) => (
-          <div key={product.id} style={styles.card}>
-            {/* IMAGE */}
-            <div style={styles.imageWrap}>
+        {products.map((p) => (
+          <div key={p.id} style={styles.card}>
             <img
-              src={product.imageUrl || "/placeholder.png"}
-              alt={product.name}
+              src={p.imageUrl || "/placeholder.png"}
               style={styles.image}
             />
-            </div>
 
-            {/* CONTENT */}
             <div style={styles.content}>
-              <h3 style={styles.name}>{product.name}</h3>
-
+              <h3 style={styles.name}>{p.name}</h3>
               <p style={styles.price}>
-                Rp {Number(product.price).toLocaleString("id-ID")}
+                Rp {Number(p.price).toLocaleString("id-ID")}
               </p>
-
-              <p style={styles.stock}>Stock: {product.stock}</p>
+              <p style={styles.stock}>Stock: {p.stock}</p>
             </div>
 
-            {/* ACTIONS */}
             <div style={styles.actions}>
-              <Link href={`/admin/products/${product.id}/edit`}>
+              <Link href={`/admin/products/${p.id}/edit`}>
                 <button style={styles.editBtn}>Edit</button>
               </Link>
 
-              <DeleteProductButton productId={product.id} />
+              <DeleteProductButton productId={p.id} />
             </div>
           </div>
         ))}

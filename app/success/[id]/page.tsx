@@ -2,18 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
 async function getOrder(id: string) {
-  const orderId = Number(id);
+  if (!id) return null;
 
-  if (isNaN(orderId)) return null;
-
-  return await prisma.order.findUnique({
-    where: { id: orderId },
+  return prisma.order.findUnique({
+    where: { id },
     include: {
-      items: {
-        include: {
-          product: true,
-        },
-      },
+      items: { include: { product: true } },
     },
   });
 }
@@ -25,25 +19,65 @@ export default async function SuccessPage({
 }) {
   const { id } = await params;
 
+  if (!id) return notFound();
+
   const order = await getOrder(id);
 
   if (!order) return notFound();
 
+  const formatPrice = (v: number) =>
+    new Intl.NumberFormat("id-ID").format(v);
+
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Order Success 🎉</h1>
+    <div style={styles.backdrop}>
+      <div style={styles.card}>
+        <h2>🎉 Order Success</h2>
 
-      <p>ID Order: {order.id}</p>
-      <p>Status: {order.status}</p>
-      <p>Total: Rp {order.total}</p>
+        <p><b>ID:</b> {order.id}</p>
+        <p><b>Status:</b> {order.status}</p>
+        <p>
+          <b>Total:</b> Rp {formatPrice(order.total)}
+        </p>
 
-      <h3>Items:</h3>
+        <div style={{ marginTop: 16 }}>
+          <h4>Items</h4>
 
-      {order.items.map((item: any) => (
-        <div key={item.id}>
-          {item.product?.name} x {item.quantity}
+          {order.items.map((item) => (
+            <div key={item.id} style={styles.item}>
+              <span>{item.product?.name}</span>
+              <span>
+                x {item.quantity}
+              </span>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 }
+
+const styles: Record<string, React.CSSProperties> = {
+  backdrop: {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#f4f6f8",
+  },
+
+  card: {
+    width: "100%",
+    maxWidth: 420,
+    background: "white",
+    padding: 24,
+    borderRadius: 20,
+    boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
+  },
+
+  item: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "6px 0",
+    borderBottom: "1px solid #eee",
+  },
+};
