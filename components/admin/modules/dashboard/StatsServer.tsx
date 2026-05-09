@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/infra/prisma/client";
 
 export default async function StatsServer() {
   const [products, orders] = await Promise.all([

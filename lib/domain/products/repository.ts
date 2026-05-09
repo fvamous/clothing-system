@@ -1,29 +1,22 @@
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/infra/prisma/client";
 import { Prisma } from "@prisma/client";
 
-export const productService = {
+export const productRepository = {
   findAll: () => {
     return prisma.product.findMany({
-      where: {
-        isDeleted: false,
-      },
+      where: { isDeleted: false },
       orderBy: { createdAt: "desc" },
     });
   },
 
   findById: (id: string) => {
     return prisma.product.findFirst({
-      where: {
-        id,
-        isDeleted: false,
-      },
+      where: { id, isDeleted: false },
     });
   },
 
   create: (data: Prisma.ProductCreateInput) => {
-    return prisma.product.create({
-      data,
-    });
+    return prisma.product.create({ data });
   },
 
   update: (id: string, data: Prisma.ProductUpdateInput) => {
@@ -36,9 +29,7 @@ export const productService = {
   delete: (id: string) => {
     return prisma.product.update({
       where: { id },
-      data: {
-        isDeleted: true,
-      },
+      data: { isDeleted: true },
     });
   },
 };

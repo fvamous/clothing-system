@@ -218,7 +218,7 @@ export default function ProductCard({
 
           {!!onDelete && (
             <Button
-              variant="destructive"
+              variant="danger"
               className="
                 h-11
                 rounded-xl

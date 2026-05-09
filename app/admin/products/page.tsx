@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/infra/prisma/client";
 
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/auth/authOptions";
+import { authOptions } from "@/lib/infra/auth/authOptions";
 
 import { redirect } from "next/navigation";
 
@@ -13,9 +13,9 @@ import {
   Plus,
 } from "lucide-react";
 
-import DeleteProductButton from "@/components/admin/products/DeleteProductButton";
+import DeleteProductButton from "@/components/admin/modules/products/DeleteProductButton";
 
-import ProductCard from "@/components/admin/products/ProductCard";
+import ProductCard from "@/components/admin/modules/products/ProductCard";
 
 import {
   Card,

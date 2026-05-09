@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 export default function AdminSidebar() {
   const pathname = usePathname();
 
-  const isActive = (path: string) => pathname.startsWith(path);
+  const isActive = (path: string) => pathname === path;
 
   return (
     <aside style={styles.sidebar}>
@@ -17,9 +17,7 @@ export default function AdminSidebar() {
           href="/admin"
           style={{
             ...styles.link,
-            ...(isActive("/admin") && pathname === "/admin"
-              ? styles.active
-              : {}),
+            ...(isActive("/admin") ? styles.active : {}),
           }}
         >
           Dashboard
@@ -44,6 +42,16 @@ export default function AdminSidebar() {
         >
           Orders
         </Link>
+
+        <Link
+          href="/admin/lookbook"
+          style={{
+            ...styles.link,
+            ...(isActive("/admin/lookbook") ? styles.active : {}),
+          }}
+        >
+          Lookbook
+        </Link>
       </nav>
     </aside>
   );
@@ -51,10 +59,10 @@ export default function AdminSidebar() {
 
 const styles: Record<string, React.CSSProperties> = {
   sidebar: {
-    width: "220px",
+    width: 220,
     background: "#111827",
     color: "#fff",
-    padding: "20px",
+    padding: 20,
     display: "flex",
     flexDirection: "column",
     gap: 20,
@@ -78,10 +86,12 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "10px 12px",
     borderRadius: 8,
     fontSize: 14,
+    transition: "all 0.2s ease",
   },
 
   active: {
     background: "#2563eb",
     color: "#fff",
+    fontWeight: 600,
   },
 };

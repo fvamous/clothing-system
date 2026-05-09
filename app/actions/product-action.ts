@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/infra/prisma/client";
 import { ProductSchema } from "@/lib/validations/product";
 import { randomUUID } from "crypto";
 

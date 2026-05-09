@@ -2,36 +2,35 @@
 
 import * as React from "react";
 
-type Props =
-  React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    variant?:
-      | "default"
-      | "outline"
-      | "destructive";
-  };
+type Variant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "danger";
+
+type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: Variant;
+};
+
+const variants: Record<Variant, string> = {
+  primary:
+    "bg-black text-white hover:opacity-90",
+  secondary:
+    "bg-muted text-foreground hover:bg-muted/80",
+  outline:
+    "border border-border bg-background hover:bg-muted",
+  ghost:
+    "bg-transparent hover:bg-muted text-foreground",
+  danger:
+    "bg-red-500 text-white hover:bg-red-600",
+};
 
 export function Button({
   className = "",
-  variant = "default",
+  variant = "primary",
   ...props
 }: Props) {
-  let variantClass = "";
-
-  if (variant === "outline") {
-    variantClass =
-      "border border-border bg-background hover:bg-muted";
-  }
-
-  if (variant === "destructive") {
-    variantClass =
-      "bg-red-500 text-white hover:bg-red-600";
-  }
-
-  if (variant === "default") {
-    variantClass =
-      "bg-black text-white hover:opacity-90";
-  }
-
   return (
     <button
       className={`
@@ -39,14 +38,15 @@ export function Button({
         items-center
         justify-center
         gap-2
-        rounded-xl
+        rounded-lg
         px-4
         py-2
         text-sm
         font-medium
-        transition-all
+        transition
         disabled:opacity-50
-        ${variantClass}
+        disabled:pointer-events-none
+        ${variants[variant]}
         ${className}
       `}
       {...props}

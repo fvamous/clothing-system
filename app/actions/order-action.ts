@@ -1,9 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/infra/prisma/client";
 import { OrderStatus } from "@prisma/client";
-import { ORDER_STATUS } from "@/lib/constants/order-status";
+import { ORDER_STATUS } from "@/lib/core/constants/order-status";
 
 type CreateOrderItem = {
   productId: string;

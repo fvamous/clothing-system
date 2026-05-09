@@ -1,55 +1,7 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* =========================
-   THEME VARIABLES
-========================= */
-:root {
-  --background: 255 255 255;
-  --foreground: 23 23 23;
-
-  --card: 255 255 255;
-  --border: 229 231 235;
-}
-
-.dark {
-  --background: 10 10 10;
-  --foreground: 237 237 237;
-
-  --card: 17 17 17;
-  --border: 38 38 38;
-}
-
-/* =========================
-   BASE STYLE
-========================= */
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply min-h-screen antialiased;
-    background-color: rgb(var(--background));
-    color: rgb(var(--foreground));
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  html {
-    @apply font-sans;
-  }
-}
-
-/* =========================
-   ANIMATIONS (GLOBAL SAFE)
-========================= */
-@keyframes toastPop {
-  0% {
-    transform: scale(0.85);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+body {
+  margin: 0;
 }

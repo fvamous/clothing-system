@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/infra/prisma/client";
 import { OrderStatus, Prisma } from "@prisma/client";
 
 export const orderRepository = {
-  create: (data: Prisma.OrderCreateInput) => {
+  create(data: Prisma.OrderCreateInput) {
     return prisma.order.create({
       data,
       include: {
@@ -11,25 +11,19 @@ export const orderRepository = {
     });
   },
 
-  findById: (id: string) => {
+  findById(id: string) {
     return prisma.order.findUnique({
       where: { id },
       include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
+        items: true,
       },
     });
   },
 
-  updateStatus: (id: string, status: OrderStatus) => {
+  updateStatus(id: string, status: OrderStatus) {
     return prisma.order.update({
       where: { id },
-      data: {
-        status,
-      },
+      data: { status },
     });
   },
 };

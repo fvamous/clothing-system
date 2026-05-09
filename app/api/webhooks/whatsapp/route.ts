@@ -1,4 +1,4 @@
-import { openrouter } from "@/lib/ai/openrouter";
+import { openrouter } from "@/lib/infra/ai/openrouter";
 
 export async function POST(req: Request) {
   try {
