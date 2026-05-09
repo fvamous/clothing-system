@@ -1,84 +1,121 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+
+type Stats = {
+  customers: number;
+  products: number;
+  countries: number;
+};
 
 export default function AboutStats() {
+  const [stats, setStats] = useState<Stats>({
+    customers: 0,
+    products: 0,
+    countries: 12, // fallback sementara
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch("/api/stats");
+        const data = await res.json();
+
+        setStats({
+          customers: data.customers,
+          products: data.products,
+          countries: data.countries ?? 12,
+        });
+      } catch (err) {
+        console.error("Failed stats load", err);
+      }
+    }
+
+    fetchStats();
+  }, []);
+
   return (
     <section style={styles.wrapper}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        style={styles.grid}
-      >
-        <Stat number="10K+" label="Happy Customers" />
-        <Stat number="50+" label="Premium Products" />
-        <Stat number="12" label="Countries Reached" />
-        <Stat number="24/7" label="Support System" />
-      </motion.div>
+      <div style={styles.grid}>
+
+        <StatCard
+          value={`${stats.customers.toLocaleString()}+`}
+          label="Happy Customers"
+        />
+
+        <StatCard
+          value={`${stats.products}+`}
+          label="Premium Products"
+        />
+
+        <StatCard
+          value={`${stats.countries}+`}
+          label="Countries Reached"
+        />
+
+        <StatCard value="24/7" label="Support System" />
+      </div>
     </section>
   );
 }
 
 /* =========================
-   STAT ITEM
+   CARD
 ========================= */
 
-function Stat({ number, label }: { number: string; label: string }) {
+function StatCard({
+  value,
+  label,
+}: {
+  value: string;
+  label: string;
+}) {
   return (
     <div style={styles.card}>
-      <div style={styles.number}>{number}</div>
-      <div style={styles.label}>{label}</div>
+      <h3 style={styles.value}>{value}</h3>
+      <p style={styles.label}>{label}</p>
     </div>
   );
 }
 
 /* =========================
-   STYLES (LUXURY SAAS FEEL)
+   STYLE
 ========================= */
 
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     marginTop: 80,
-    display: "flex",
-    justifyContent: "center",
     padding: "0 20px",
   },
 
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-    gap: 20,
+    gap: 16,
     maxWidth: 900,
-    width: "100%",
+    margin: "0 auto",
   },
 
   card: {
-    background: "rgba(255,255,255,0.6)",
-    backdropFilter: "blur(18px)",
-
-    border: "1px solid rgba(255,154,158,0.2)",
+    padding: 20,
     borderRadius: 18,
-
-    padding: "24px 20px",
+    background: "rgba(255,255,255,0.6)",
+    backdropFilter: "blur(14px)",
+    border: "1px solid rgba(0,0,0,0.06)",
     textAlign: "center",
-
-    boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-
-    transition: "all .3s ease",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
   },
 
-  number: {
-    fontSize: 28,
+  value: {
+    fontSize: 24,
     fontWeight: 700,
     color: "#111",
-    marginBottom: 6,
   },
 
   label: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#666",
-    letterSpacing: 0.3,
+    marginTop: 6,
+    letterSpacing: 0.5,
   },
 };

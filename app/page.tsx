@@ -1,29 +1,14 @@
 import Hero from "@/components/sections/Hero";
+import StatsServer from "@/components/admin/modules/dashboard/StatsServer";
 
 export default function Home() {
   return (
     <main style={styles.page}>
       <Hero />
 
-      {/* STATS */}
-      <section style={styles.stats}>
-        <div style={styles.statCard}>
-          <h2>120+</h2>
-          <p>Products</p>
-        </div>
+      {/* REAL STATS (SERVER RENDERED) */}
+      <StatsServer />
 
-        <div style={styles.statCard}>
-          <h2>450+</h2>
-          <p>Orders</p>
-        </div>
-
-        <div style={styles.statCard}>
-          <h2>99%</h2>
-          <p>Uptime</p>
-        </div>
-      </section>
-
-      {/* PRODUCT PREVIEW */}
       <section style={styles.preview}>
         <h2 style={styles.sectionTitle}>Featured Products</h2>
 
@@ -34,7 +19,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
       <section style={styles.testimonials}>
         <h2 style={styles.sectionTitle}>What Users Say</h2>
 

@@ -2,23 +2,42 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Bell, Search } from "lucide-react";
 
 export default function AdminTopNav() {
   const pathname = usePathname();
 
-  const isActive = (path: string) => pathname.startsWith(path);
+  const isActive = (path: string) =>
+    pathname.startsWith(path);
+
+  const getTitle = () => {
+    if (pathname.startsWith("/admin/products"))
+      return "Products";
+
+    if (pathname.startsWith("/admin/orders"))
+      return "Orders";
+
+    return "Dashboard";
+  };
 
   return (
-    <div style={styles.bar}>
-      <div style={styles.inner}>
-        <h2 style={styles.logo}>Admin Panel</h2>
+    <header style={styles.bar}>
+      {/* LEFT */}
+      <div style={styles.left}>
+        <button style={styles.menu}>☰</button>
+
+        <h2 style={styles.title}>
+          {getTitle()}
+        </h2>
 
         <nav style={styles.nav}>
           <Link
             href="/admin/products"
             style={{
               ...styles.link,
-              ...(isActive("/admin/products") ? styles.active : {}),
+              ...(isActive("/admin/products")
+                ? styles.active
+                : {}),
             }}
           >
             Products
@@ -28,65 +47,147 @@ export default function AdminTopNav() {
             href="/admin/orders"
             style={{
               ...styles.link,
-              ...(isActive("/admin/orders") ? styles.active : {}),
+              ...(isActive("/admin/orders")
+                ? styles.active
+                : {}),
             }}
           >
             Orders
           </Link>
         </nav>
       </div>
-    </div>
+
+      {/* CENTER SEARCH */}
+      <div style={styles.searchBox}>
+        <Search size={16} />
+        <input
+          placeholder="Cari produk, order..."
+          style={styles.input}
+        />
+      </div>
+
+      {/* RIGHT */}
+      <div style={styles.right}>
+        <button style={styles.icon}>
+          <Bell size={18} />
+          <span style={styles.badge}>
+            3
+          </span>
+        </button>
+
+        <div style={styles.user}>
+          👨‍💼 Admin
+        </div>
+      </div>
+    </header>
   );
 }
 
-/* =========================
-   STYLES (MUST OUTSIDE COMPONENT)
-========================= */
 const styles: Record<string, React.CSSProperties> = {
   bar: {
-    background: "linear-gradient(90deg, #0f172a, #111827)",
-    color: "#1d1a1a",
-    padding: "10px 0",
     position: "sticky",
     top: 0,
     zIndex: 50,
-    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-  },
-
-  inner: {
-    maxWidth: 1100,
-    margin: "0 auto",
-    padding: "0 18px",
 
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+
+    padding: "10px 16px",
+    background:
+      "linear-gradient(90deg, #0f172a, #111827)",
+    color: "#fff",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
   },
 
-  logo: {
-    fontSize: 16,
+  left: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  menu: {
+    background: "transparent",
+    border: "none",
+    color: "#fff",
+    fontSize: 18,
+    cursor: "pointer",
+  },
+
+  title: {
+    fontSize: 15,
     fontWeight: 700,
-    letterSpacing: 0.5,
-    margin: 0,
   },
 
   nav: {
     display: "flex",
     gap: 10,
-    alignItems: "center",
+    marginLeft: 10,
   },
 
   link: {
     color: "#94a3b8",
     textDecoration: "none",
-    padding: "8px 12px",
-    borderRadius: 10,
-    fontSize: 14,
-    transition: "all 0.2s ease",
+    fontSize: 13,
+    padding: "6px 10px",
+    borderRadius: 8,
   },
 
   active: {
-    background: "rgba(59,130,246,0.15)",
+    background: "rgba(59,130,246,0.2)",
     color: "#60a5fa",
+  },
+
+  searchBox: {
+    flex: 1,
+    maxWidth: 400,
+
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+
+    background: "rgba(255,255,255,0.08)",
+    padding: "6px 10px",
+    borderRadius: 10,
+    margin: "0 20px",
+  },
+
+  input: {
+    width: "100%",
+    background: "transparent",
+    border: "none",
+    outline: "none",
+    color: "#fff",
+  },
+
+  right: {
+    display: "flex",
+    alignItems: "center",
+    gap: 14,
+  },
+
+  icon: {
+    position: "relative",
+    background: "transparent",
+    border: "none",
+    color: "#fff",
+    cursor: "pointer",
+  },
+
+  badge: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    background: "red",
+    color: "#fff",
+    fontSize: 10,
+    borderRadius: 999,
+    padding: "2px 5px",
+  },
+
+  user: {
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: "pointer",
   },
 };
