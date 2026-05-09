@@ -2,20 +2,28 @@ import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
-    // 🔥 STAGE 1: Vision AI dimatikan sementara
-    // Fokus: UI + form system + stabilisasi
+    // Vision AI sementara dimatikan
+    // Supaya admin panel tetap stabil
+    // dan tidak menyebabkan runtime error
 
     return NextResponse.json({
+      success: true,
+
       result: {
         description: "",
       },
     });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json(
       {
-        error: "Vision AI disabled temporarily",
+        success: false,
+
+        error:
+          "Vision AI disabled temporarily",
       },
-      { status: 200 }
+      {
+        status: 500,
+      }
     );
   }
 }

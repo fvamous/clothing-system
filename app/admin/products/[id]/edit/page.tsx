@@ -1,78 +1,170 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+
+import Image from "next/image";
+
+import {
+  useParams,
+  useRouter,
+} from "next/navigation";
+
+import {
+  Loader2,
+  Save,
+  Upload,
+  XCircle,
+  CheckCircle2,
+} from "lucide-react";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+
+import Input from "@/components/ui/input";
+
+import Textarea from "@/components/ui/textarea";
 
 export default function EditProductPage() {
   const router = useRouter();
+
   const params = useParams();
+
   const id = params.id as string;
 
   // =========================
-  // FORM STATE
+  // FORM
   // =========================
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const [name, setName] =
+    useState("");
 
-  const [category, setCategory] = useState("");
-  const [color, setColor] = useState("");
-  const [material, setMaterial] = useState("");
-  const [stock, setStock] = useState("");
-  const [description, setDescription] = useState("");
+  const [price, setPrice] =
+    useState("");
 
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState("");
+  const [category, setCategory] =
+    useState("");
 
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
+  const [color, setColor] =
+    useState("");
+
+  const [material, setMaterial] =
+    useState("");
+
+  const [stock, setStock] =
+    useState("");
+
+  const [description, setDescription] =
+    useState("");
+
+  const [file, setFile] =
+    useState<File | null>(null);
+
+  const [preview, setPreview] =
+    useState("");
 
   // =========================
-  // MODALS
+  // UI STATE
   // =========================
-  const [modal, setModal] = useState({
-    open: false,
-    message: "",
-  });
+  const [loading, setLoading] =
+    useState(true);
 
-  const [successModal, setSuccessModal] = useState(false);
+  const [uploading, setUploading] =
+    useState(false);
+
+  const [progress, setProgress] =
+    useState(0);
+
+  const [submitting, setSubmitting] =
+    useState(false);
 
   // =========================
-  // FETCH PRODUCT
+  // MODAL
+  // =========================
+  const [errorModal, setErrorModal] =
+    useState({
+      open: false,
+      message: "",
+    });
+
+  const [successModal, setSuccessModal] =
+    useState(false);
+
+  // =========================
+  // LOAD PRODUCT
   // =========================
   useEffect(() => {
     let ignore = false;
 
-    async function load() {
+    async function loadProduct() {
       try {
-        const res = await fetch(`/api/products/${id}`);
+        setLoading(true);
+
+        const res = await fetch(
+          `/api/products/${id}`
+        );
+
         const data = await res.json();
 
         if (ignore) return;
 
         if (!res.ok) {
-          throw new Error(data?.error || "Failed load product");
+          throw new Error(
+            data?.error ||
+              "Failed load product"
+          );
         }
 
         setName(data?.name || "");
-        setPrice(String(data?.price || ""));
-        setCategory(data?.categoryId || "");
+
+        setPrice(
+          String(data?.price || "")
+        );
+
+        setCategory(
+          data?.categoryId || ""
+        );
+
         setColor(data?.color || "");
-        setMaterial(data?.material || "");
-        setStock(String(data?.stock || 0));
-        setDescription(data?.description || "");
-        setPreview(data?.imageUrl || "");
-      } catch (err: any) {
+
+        setMaterial(
+          data?.material || ""
+        );
+
+        setStock(
+          String(data?.stock || 0)
+        );
+
+        setDescription(
+          data?.description || ""
+        );
+
+        setPreview(
+          data?.imageUrl || ""
+        );
+      } catch (error: any) {
         if (!ignore) {
-          setModal({
+          setErrorModal({
             open: true,
-            message: err.message || "Failed to load product",
+            message:
+              error.message ||
+              "Failed load product",
           });
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
         }
       }
     }
 
-    if (id) load();
+    if (id) {
+      loadProduct();
+    }
 
     return () => {
       ignore = true;
@@ -80,308 +172,451 @@ export default function EditProductPage() {
   }, [id]);
 
   // =========================
-  // FILE HANDLER
+  // FILE
   // =========================
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
+  function handleFile(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const selected =
+      e.target.files?.[0];
 
-    setFile(f);
+    if (!selected) return;
+
+    setFile(selected);
 
     if (preview.startsWith("blob:")) {
       URL.revokeObjectURL(preview);
     }
 
-    setPreview(URL.createObjectURL(f));
+    setPreview(
+      URL.createObjectURL(selected)
+    );
   }
 
   // =========================
-  // UPLOAD IMAGE
+  // UPLOAD
   // =========================
-  async function uploadFile(file: File) {
+  async function uploadFile(
+    image: File
+  ) {
     setUploading(true);
+
     setProgress(0);
 
     const formData = new FormData();
-    formData.append("file", file);
+
+    formData.append("file", image);
 
     const interval = setInterval(() => {
-      setProgress((p) => (p < 90 ? p + 10 : p));
+      setProgress((prev) =>
+        prev < 90 ? prev + 10 : prev
+      );
     }, 120);
 
     try {
-      const res = await fetch("/api/uploads", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        "/api/uploads",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Upload failed");
+        throw new Error(
+          data?.error ||
+            "Upload failed"
+        );
       }
 
       return data.url;
     } finally {
       clearInterval(interval);
+
       setProgress(100);
+
       setUploading(false);
     }
   }
 
   // =========================
-  // SUBMIT UPDATE
+  // SUBMIT
   // =========================
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
     e.preventDefault();
 
     if (submitting) return;
-    setSubmitting(true);
 
     try {
+      setSubmitting(true);
+
       let imageUrl = preview;
 
       if (file) {
-        imageUrl = await uploadFile(file);
+        imageUrl = await uploadFile(
+          file
+        );
       }
 
-      const res = await fetch(`/api/products/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          price: Number(price) || 0,
-          stock: Number(stock) || 0,
-          category,
-          color,
-          material,
-          description,
-          imageUrl,
-        }),
-      });
+      const res = await fetch(
+        `/api/products/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            price:
+              Number(price) || 0,
+            stock:
+              Number(stock) || 0,
+            category,
+            color,
+            material,
+            description,
+            imageUrl,
+          }),
+        }
+      );
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Update failed");
+        throw new Error(
+          data?.error ||
+            "Update failed"
+        );
       }
 
-      // =========================
-      // SUCCESS POPUP
-      // =========================
       setSuccessModal(true);
 
       setTimeout(() => {
         setSuccessModal(false);
-        router.push("/admin/products");
-        router.refresh();
-      }, 1200);
 
-    } catch (err: any) {
-      setModal({
+        router.push(
+          "/admin/products"
+        );
+
+        router.refresh();
+      }, 1400);
+    } catch (error: any) {
+      setErrorModal({
         open: true,
-        message: err.message || "Unexpected error",
+        message:
+          error.message ||
+          "Unexpected error",
       });
     } finally {
       setSubmitting(false);
     }
   }
 
+  // =========================
+  // LOADING
+  // =========================
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <main style={styles.page}>
-      <div style={styles.modal}>
-        <h1 style={styles.title}>Edit Product</h1>
+    <main className="min-h-screen bg-gray-100 p-6">
+      <div className="mx-auto max-w-5xl">
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b">
+            <CardTitle>
+              Edit Product
+            </CardTitle>
+          </CardHeader>
 
-        {preview && <img src={preview} style={styles.preview} />}
+          <CardContent className="space-y-6">
+            {/* IMAGE */}
+            <div className="overflow-hidden rounded-3xl border bg-gray-100">
+              {preview ? (
+                <Image
+                  src={preview}
+                  alt={name || "Product"}
+                  width={1200}
+                  height={700}
+                  className="h-[320px] w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-[320px] items-center justify-center text-gray-400">
+                  No Image
+                </div>
+              )}
+            </div>
 
-        {uploading && (
-          <div style={styles.progressWrap}>
-            <div
-              style={{
-                ...styles.progressBar,
-                width: `${progress}%`,
-              }}
-            />
-          </div>
-        )}
+            {/* PROGRESS */}
+            {uploading && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>
+                    Uploading image...
+                  </span>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.grid}>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Product name" style={styles.input} />
-            <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Category" style={styles.input} />
-            <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color" style={styles.input} />
-            <input value={material} onChange={(e) => setMaterial(e.target.value)} placeholder="Material" style={styles.input} />
-            <input value={stock} onChange={(e) => setStock(e.target.value)} placeholder="Stock" type="number" style={styles.input} />
-            <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price" type="number" style={styles.input} />
-          </div>
+                  <span>
+                    {progress}%
+                  </span>
+                </div>
 
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description"
-            style={styles.textarea}
-          />
+                <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                  <div
+                    className="h-full rounded-full bg-black transition-all"
+                    style={{
+                      width: `${progress}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
 
-          <input type="file" accept="image/*" onChange={handleFile} />
+            {/* FORM */}
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Product Name
+                  </label>
 
-          <button disabled={uploading || submitting} style={styles.button}>
-            {submitting ? "Saving..." : uploading ? "Uploading..." : "Save Product"}
-          </button>
-        </form>
+                  <Input
+                    value={name}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setName(
+                        e.target.value
+                      )
+                    }
+                    placeholder="Oversized Hoodie"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Category
+                  </label>
+
+                  <Input
+                    value={category}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setCategory(
+                        e.target.value
+                      )
+                    }
+                    placeholder="Hoodie"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Color
+                  </label>
+
+                  <Input
+                    value={color}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setColor(
+                        e.target.value
+                      )
+                    }
+                    placeholder="Black"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Material
+                  </label>
+
+                  <Input
+                    value={material}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setMaterial(
+                        e.target.value
+                      )
+                    }
+                    placeholder="Cotton Fleece"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Stock
+                  </label>
+
+                  <Input
+                    type="number"
+                    value={stock}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setStock(
+                        e.target.value
+                      )
+                    }
+                    placeholder="100"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Price
+                  </label>
+
+                  <Input
+                    type="number"
+                    value={price}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setPrice(
+                        e.target.value
+                      )
+                    }
+                    placeholder="250000"
+                  />
+                </div>
+              </div>
+
+              {/* DESCRIPTION */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Description
+                </label>
+
+                <Textarea
+                  value={description}
+                  onChange={(
+                    e: React.ChangeEvent<HTMLTextAreaElement>
+                  ) =>
+                    setDescription(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Premium streetwear hoodie..."
+                  className="min-h-[140px]"
+                />
+              </div>
+
+              {/* FILE */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium">
+                  Product Image
+                </label>
+
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-3xl border border-dashed p-6 transition hover:bg-gray-50">
+                  <Upload className="h-5 w-5" />
+
+                  <span>
+                    Upload New Image
+                  </span>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFile}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* ACTION */}
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={
+                    uploading ||
+                    submitting
+                  }
+                  className="h-12 px-8"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+
+                      Save Product
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
 
       {/* ERROR MODAL */}
-      {modal.open && (
-        <div style={styles.overlay}>
-          <div style={styles.modalBox}>
-            <p>{modal.message}</p>
-            <button onClick={() => setModal({ open: false, message: "" })} style={styles.closeBtn}>
+      {errorModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-2 text-red-500">
+              <XCircle className="h-5 w-5" />
+
+              <h3 className="font-semibold">
+                Error
+              </h3>
+            </div>
+
+            <p className="text-sm text-gray-600">
+              {errorModal.message}
+            </p>
+
+            <Button
+              className="mt-5 w-full"
+              onClick={() =>
+                setErrorModal({
+                  open: false,
+                  message: "",
+                })
+              }
+            >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
-      {/* SUCCESS POPUP */}
+      {/* SUCCESS MODAL */}
       {successModal && (
-        <div style={styles.successOverlay}>
-          <div style={styles.successBox}>
-            <div style={{ fontSize: 40 }}>✅</div>
-            <p style={{ fontWeight: 600 }}>Produk berhasil disimpan</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
+            <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-500" />
+
+            <h3 className="text-xl font-bold">
+              Success
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Product updated successfully
+            </p>
           </div>
         </div>
       )}
     </main>
   );
 }
-
-/* =========================
-   STYLES
-========================= */
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-    background: "#f4f6f8",
-  },
-
-  modal: {
-    width: "100%",
-    maxWidth: 640,
-    background: "#fff",
-    borderRadius: 24,
-    padding: 24,
-    boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: 700,
-  },
-
-  preview: {
-    width: "100%",
-    height: 260,
-    objectFit: "cover",
-    borderRadius: 16,
-  },
-
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 10,
-  },
-
-  input: {
-    padding: 12,
-    borderRadius: 12,
-    border: "1px solid #ddd",
-  },
-
-  textarea: {
-    minHeight: 120,
-    padding: 12,
-    borderRadius: 12,
-    border: "1px solid #ddd",
-  },
-
-  button: {
-    padding: 14,
-    borderRadius: 14,
-    border: "none",
-    background: "#111",
-    color: "#fff",
-    cursor: "pointer",
-  },
-
-  progressWrap: {
-    height: 6,
-    background: "#eee",
-    borderRadius: 999,
-    overflow: "hidden",
-  },
-
-  progressBar: {
-    height: "100%",
-    background: "#111",
-    transition: "width 0.2s ease",
-  },
-
-  overlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.4)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  modalBox: {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 12,
-    width: 320,
-  },
-
-  closeBtn: {
-    marginTop: 12,
-    padding: 10,
-    border: "none",
-    borderRadius: 8,
-    background: "#111",
-    color: "#fff",
-  },
-
-  // ✅ FIXED HERE (INI YANG SEBELUMNYA ERROR)
-  successOverlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.4)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999,
-  },
-
-  successBox: {
-    background: "#fff",
-    padding: 24,
-    borderRadius: 16,
-    textAlign: "center",
-    width: 260,
-  },
-};

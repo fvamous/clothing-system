@@ -1,7 +1,8 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { Product } from "@/types/product";
+
+import type { Product } from "@/types/product";
 
 export default function ProductCard({
   product,
@@ -9,6 +10,28 @@ export default function ProductCard({
   product: Product;
 }) {
   const { addToCart } = useCart();
+
+  function handleAddToCart() {
+    addToCart({
+      id: String(product.id),
+
+      name: product.name,
+
+      price: Number(product.price),
+
+      quantity: 1,
+
+      imageUrl:
+        product.imageUrl ??
+        undefined,
+
+      stock:
+        typeof product.stock ===
+        "number"
+          ? product.stock
+          : 0,
+    });
+  }
 
   return (
     <div
@@ -21,21 +44,20 @@ export default function ProductCard({
         gap: 8,
       }}
     >
-      <h3 style={{ margin: 0 }}>{product.name}</h3>
+      <h3 style={{ margin: 0 }}>
+        {product.name}
+      </h3>
 
       <p style={{ margin: 0 }}>
-        Rp {product.price.toLocaleString()}
+        Rp{" "}
+        {Number(
+          product.price
+        ).toLocaleString("id-ID")}
       </p>
 
       <button
-        onClick={() =>
-          addToCart({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            imageUrl: product.imageUrl ?? null, // 🔥 FIX penting
-          })
-        }
+        type="button"
+        onClick={handleAddToCart}
         style={{
           marginTop: 8,
           padding: "8px 12px",

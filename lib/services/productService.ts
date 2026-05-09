@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma/client";
 import { Prisma } from "@prisma/client";
 
 export const productService = {

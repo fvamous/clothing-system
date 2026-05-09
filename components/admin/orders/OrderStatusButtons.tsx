@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { getAllowedActions, OrderStatus } from "@/lib/orderFlow";
+import { getAllowedActions, OrderStatus } from "@/lib/orders/order-workflow";
 
 export default function OrderStatusButtons({
   orderId,

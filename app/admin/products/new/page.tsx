@@ -1,8 +1,34 @@
 "use client";
 
 import React, { useState } from "react";
-import useProtected from "@/lib/useProtected";
+
+import Image from "next/image";
+
 import { useRouter } from "next/navigation";
+
+import {
+  Loader2,
+  Sparkles,
+  Save,
+  Upload,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+
+import useProtected from "@/hooks/useProtected";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+
+import Input from "@/components/ui/input";
+
+import Textarea from "@/components/ui/textarea";
 
 export default function NewProductPage() {
   useProtected();
@@ -12,37 +38,75 @@ export default function NewProductPage() {
   // =========================
   // FORM STATE
   // =========================
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const [name, setName] =
+    useState("");
 
-  const [category, setCategory] = useState("");
-  const [color, setColor] = useState("");
-  const [material, setMaterial] = useState("");
-  const [stock, setStock] = useState("");
-  const [description, setDescription] = useState("");
+  const [price, setPrice] =
+    useState("");
 
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState("");
+  const [category, setCategory] =
+    useState("");
 
-  const [saving, setSaving] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [error, setError] = useState("");
+  const [color, setColor] =
+    useState("");
+
+  const [material, setMaterial] =
+    useState("");
+
+  const [stock, setStock] =
+    useState("");
+
+  const [description, setDescription] =
+    useState("");
+
+  const [preview, setPreview] =
+    useState("");
+
+  // =========================
+  // UI STATE
+  // =========================
+  const [saving, setSaving] =
+    useState(false);
+
+  const [generating, setGenerating] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState(false);
 
   // =========================
   // AI IMAGE ANALYZE
   // =========================
-  async function handleAnalyzeImage(imageBase64: string) {
+  async function handleAnalyzeImage(
+    imageBase64: string
+  ) {
     try {
       setGenerating(true);
+
       setError("");
 
-      const res = await fetch("/api/ai/vision-product", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imageBase64 }),
-      });
+      const res = await fetch(
+        "/api/ai/vision-product",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            image: imageBase64,
+          }),
+        }
+      );
 
-      if (!res.ok) throw new Error("AI image analyze failed");
+      if (!res.ok) {
+        throw new Error(
+          "AI image analyze failed"
+        );
+      }
 
       const data = await res.json();
 
@@ -50,23 +114,49 @@ export default function NewProductPage() {
 
       try {
         parsed =
-          typeof data.result === "string"
-            ? JSON.parse(data.result)
+          typeof data.result ===
+          "string"
+            ? JSON.parse(
+                data.result
+              )
             : data.result;
       } catch {
         return;
       }
 
-      if (parsed?.name) setName(parsed.name);
-      if (parsed?.category) setCategory(parsed.category);
-      if (parsed?.color) setColor(parsed.color);
-      if (parsed?.material) setMaterial(parsed.material);
-
-      if (!description && parsed?.description) {
-        setDescription(parsed.description);
+      if (parsed?.name) {
+        setName(parsed.name);
       }
-    } catch (err: any) {
-      setError(err.message || "AI error");
+
+      if (parsed?.category) {
+        setCategory(
+          parsed.category
+        );
+      }
+
+      if (parsed?.color) {
+        setColor(parsed.color);
+      }
+
+      if (parsed?.material) {
+        setMaterial(
+          parsed.material
+        );
+      }
+
+      if (
+        !description &&
+        parsed?.description
+      ) {
+        setDescription(
+          parsed.description
+        );
+      }
+    } catch (error: any) {
+      setError(
+        error.message ||
+          "AI error"
+      );
     } finally {
       setGenerating(false);
     }
@@ -75,26 +165,43 @@ export default function NewProductPage() {
   // =========================
   // FILE HANDLER
   // =========================
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
+  function handleFile(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const selected =
+      e.target.files?.[0];
 
-    if (!f.type.startsWith("image/")) {
-      setError("Only image allowed");
+    if (!selected) return;
+
+    if (
+      !selected.type.startsWith(
+        "image/"
+      )
+    ) {
+      setError(
+        "Only image allowed"
+      );
+
       return;
     }
 
-    setFile(f);
-
-    const reader = new FileReader();
+    const reader =
+      new FileReader();
 
     reader.onload = async () => {
-      const result = reader.result as string;
+      const result =
+        reader.result as string;
+
       setPreview(result);
-      await handleAnalyzeImage(result);
+
+      await handleAnalyzeImage(
+        result
+      );
     };
 
-    reader.readAsDataURL(f);
+    reader.readAsDataURL(
+      selected
+    );
   }
 
   // =========================
@@ -103,35 +210,55 @@ export default function NewProductPage() {
   async function handleGenerateAI() {
     try {
       setGenerating(true);
+
       setError("");
 
       if (!name) {
-        setError("Product name required");
+        setError(
+          "Product name required"
+        );
+
         return;
       }
 
-      const res = await fetch("/api/ai/generate-description", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          category,
-          color,
-          material,
-        }),
-      });
+      const res = await fetch(
+        "/api/ai/generate-description",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            category,
+            color,
+            material,
+          }),
+        }
+      );
 
-      if (!res.ok) throw new Error("Failed generate description");
+      if (!res.ok) {
+        throw new Error(
+          "Failed generate description"
+        );
+      }
 
       const data = await res.json();
 
       setDescription(
-        typeof data.result === "string"
+        typeof data.result ===
+          "string"
           ? data.result
-          : JSON.stringify(data.result)
+          : JSON.stringify(
+              data.result
+            )
       );
-    } catch (err: any) {
-      setError(err.message || "AI error");
+    } catch (error: any) {
+      setError(
+        error.message ||
+          "AI error"
+      );
     } finally {
       setGenerating(false);
     }
@@ -140,194 +267,362 @@ export default function NewProductPage() {
   // =========================
   // SUBMIT PRODUCT
   // =========================
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
     e.preventDefault();
 
     if (!name || !price) {
-      setError("Name and price required");
+      setError(
+        "Name and price required"
+      );
+
       return;
     }
 
     try {
       setSaving(true);
 
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          price: Number(price),
-          stock: Number(stock),
-          category,
-          color,
-          material,
-          description,
-          imageUrl: preview,
-        }),
-      });
+      setError("");
+
+      const res = await fetch(
+        "/api/products",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            price:
+              Number(price),
+            stock:
+              Number(stock) || 0,
+            category,
+            color,
+            material,
+            description,
+            imageUrl: preview,
+          }),
+        }
+      );
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data?.error || "Failed save product");
+      if (!res.ok) {
+        throw new Error(
+          data?.error ||
+            "Failed save product"
+        );
+      }
 
-      router.push("/admin/products");
-    } catch (err: any) {
-      setError(err.message || "Failed save");
+      setSuccess(true);
+
+      setTimeout(() => {
+        router.push(
+          "/admin/products"
+        );
+
+        router.refresh();
+      }, 1400);
+    } catch (error: any) {
+      setError(
+        error.message ||
+          "Failed save"
+      );
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <main style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Create Product</h1>
+    <main className="min-h-screen bg-muted/30 p-6">
+      <div className="mx-auto max-w-5xl">
+        <Card className="overflow-hidden border-0 shadow-2xl">
+          <CardHeader className="border-b">
+            <CardTitle className="text-2xl font-bold">
+              Create Product
+            </CardTitle>
+          </CardHeader>
 
-        {error && <div style={styles.error}>{error}</div>}
+          <CardContent className="space-y-6 p-6">
+            {/* ERROR */}
+            {error && (
+              <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+                <AlertCircle className="h-4 w-4" />
 
-        {/* IMAGE */}
-        <label style={styles.uploadBox}>
-          <input type="file" hidden onChange={handleFile} />
+                {error}
+              </div>
+            )}
 
-          {preview ? (
-            <img src={preview} style={styles.preview} />
-          ) : (
-            <div style={styles.placeholder}>Upload image</div>
-          )}
-        </label>
+            {/* IMAGE */}
+            <label className="block cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed border-border bg-background transition hover:border-black">
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={
+                  handleFile
+                }
+              />
 
-        {generating && <p style={styles.info}>AI processing...</p>}
+              {preview ? (
+                <Image
+                  src={preview}
+                  alt="Product preview"
+                  width={1200}
+                  height={700}
+                  className="h-[320px] w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-[320px] flex-col items-center justify-center gap-3 text-muted-foreground">
+                  <Upload className="h-10 w-10" />
 
-        {/* FORM */}
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.grid}>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" style={styles.input} />
-            <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Category" style={styles.input} />
-            <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color" style={styles.input} />
-            <input value={material} onChange={(e) => setMaterial(e.target.value)} placeholder="Material" style={styles.input} />
-            <input value={stock} onChange={(e) => setStock(e.target.value)} placeholder="Stock" type="number" style={styles.input} />
-            <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price" type="number" style={styles.input} />
-          </div>
+                  <p>
+                    Upload product image
+                  </p>
+                </div>
+              )}
+            </label>
 
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description"
-            style={styles.textarea}
-          />
+            {/* AI INFO */}
+            {generating && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
 
-          <button type="button" onClick={handleGenerateAI} style={styles.aiBtn}>
-            Generate Description
-          </button>
+                AI processing...
+              </div>
+            )}
 
-          <button disabled={saving || generating} style={styles.button}>
-            {saving ? "Saving..." : "Save Product"}
-          </button>
-        </form>
+            {/* FORM */}
+            <form
+              onSubmit={
+                handleSubmit
+              }
+              className="space-y-6"
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Product Name
+                  </label>
+
+                  <Input
+                    value={name}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setName(
+                        e.target
+                          .value
+                      )
+                    }
+                    placeholder="Oversized Hoodie"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Category
+                  </label>
+
+                  <Input
+                    value={
+                      category
+                    }
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setCategory(
+                        e.target
+                          .value
+                      )
+                    }
+                    placeholder="Hoodie"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Color
+                  </label>
+
+                  <Input
+                    value={color}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setColor(
+                        e.target
+                          .value
+                      )
+                    }
+                    placeholder="Black"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Material
+                  </label>
+
+                  <Input
+                    value={
+                      material
+                    }
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setMaterial(
+                        e.target
+                          .value
+                      )
+                    }
+                    placeholder="Cotton Fleece"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Stock
+                  </label>
+
+                  <Input
+                    type="number"
+                    value={stock}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setStock(
+                        e.target
+                          .value
+                      )
+                    }
+                    placeholder="100"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Price
+                  </label>
+
+                  <Input
+                    type="number"
+                    value={price}
+                    onChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setPrice(
+                        e.target
+                          .value
+                      )
+                    }
+                    placeholder="250000"
+                  />
+                </div>
+              </div>
+
+              {/* DESCRIPTION */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Description
+                </label>
+
+                <Textarea
+                  value={
+                    description
+                  }
+                  onChange={(
+                    e: React.ChangeEvent<HTMLTextAreaElement>
+                  ) =>
+                    setDescription(
+                      e.target
+                        .value
+                    )
+                  }
+                  placeholder="Premium streetwear hoodie..."
+                  className="min-h-[140px]"
+                />
+              </div>
+
+              {/* AI BUTTON */}
+              <Button
+                type="button"
+                onClick={
+                  handleGenerateAI
+                }
+                disabled={
+                  generating
+                }
+                variant="outline"
+                className="w-full"
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+
+                    Generate Description
+                  </>
+                )}
+              </Button>
+
+              {/* SUBMIT */}
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={
+                    saving ||
+                    generating
+                  }
+                  className="h-12 px-8"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+
+                      Save Product
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* SUCCESS */}
+      {success && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-background p-8 text-center shadow-2xl">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
+            </div>
+
+            <h3 className="text-xl font-bold">
+              Product Saved
+            </h3>
+
+            <p className="mt-2 text-sm text-muted-foreground">
+              Product successfully
+              created
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
-
-/* =========================
-   SHOPIFY-STYLE MODAL UI
-========================= */
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-    background: "#f4f6f8",
-  },
-
-  card: {
-    width: "100%",
-    maxWidth: 680,
-    background: "#fff",
-    borderRadius: 24,
-    padding: 24,
-    boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
-    display: "flex",
-    flexDirection: "column",
-    gap: 14,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: 700,
-  },
-
-  error: {
-    background: "#ffe5e5",
-    padding: 10,
-    borderRadius: 10,
-  },
-
-  uploadBox: {
-    border: "2px dashed #ddd",
-    borderRadius: 16,
-    overflow: "hidden",
-    cursor: "pointer",
-  },
-
-  preview: {
-    width: "100%",
-    height: 260,
-    objectFit: "cover",
-  },
-
-  placeholder: {
-    padding: 50,
-    textAlign: "center",
-    color: "#888",
-  },
-
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 10,
-  },
-
-  input: {
-    padding: 12,
-    borderRadius: 12,
-    border: "1px solid #ddd",
-  },
-
-  textarea: {
-    minHeight: 120,
-    padding: 12,
-    borderRadius: 12,
-    border: "1px solid #ddd",
-  },
-
-  aiBtn: {
-    padding: 10,
-    borderRadius: 12,
-    border: "1px solid #ccc",
-    background: "#f8f8f8",
-    cursor: "pointer",
-  },
-
-  button: {
-    padding: 14,
-    borderRadius: 14,
-    border: "none",
-    background: "#111",
-    color: "#fff",
-    cursor: "pointer",
-  },
-
-  info: {
-    fontSize: 13,
-    color: "#666",
-  },
-};

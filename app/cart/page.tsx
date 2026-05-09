@@ -1,73 +1,121 @@
 "use client";
 
+import Link from "next/link";
+
 import { useCart } from "@/context/CartContext";
 
-export default function CartPage() {
-  const { cart, removeFromCart, clearCart } = useCart();
+import CartItem from "@/components/cart/CartItem";
 
+export default function CartPage() {
+  const { cart } =
+  useCart();
   const total = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
+    (sum, item) =>
+      sum +
+      item.price *
+        item.quantity,
     0
   );
 
-  async function checkout() {
-    if (cart.length === 0) return alert("Cart kosong");
+  if (cart.length === 0) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
+        <h1 className="text-3xl font-bold">
+          Your Cart is Empty
+        </h1>
 
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        items: cart,
-        total,
-      }),
-    });
+        <p className="text-gray-500">
+          Add some products first
+        </p>
 
-    if (res.ok) {
-      clearCart();
-      alert("Checkout berhasil!");
-    }
+        <Link
+          href="/catalog"
+          className="rounded-xl bg-black px-5 py-3 text-white"
+        >
+          Continue Shopping
+        </Link>
+      </main>
+    );
   }
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Cart</h1>
+    <main className="min-h-screen bg-gray-50 p-6">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold tracking-tight">
+            Shopping Cart
+          </h1>
 
-      {cart.length === 0 ? (
-        <p>Cart kosong</p>
-      ) : (
-        <>
-          {cart.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: 10,
-                borderBottom: "1px solid #eee",
-              }}
-            >
-              <div>
-                <b>{item.name}</b>
-                <p>
-                  Rp {item.price} x {item.qty}
-                </p>
+          <p className="mt-2 text-gray-500">
+            Review your items
+            before checkout
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
+          {/* CART ITEMS */}
+          <div className="space-y-5">
+            {cart.map((item) => (
+              <CartItem
+                key={item.id}
+                item={item}
+              />
+            ))}
+          </div>
+
+          {/* SUMMARY */}
+          <div className="sticky top-6 h-fit rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-bold">
+              Order Summary
+            </h2>
+
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">
+                  Items
+                </span>
+
+                <span>
+                  {cart.length}
+                </span>
               </div>
 
-              <button onClick={() => removeFromCart(item.id)}>
-                Hapus
-              </button>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">
+                  Shipping
+                </span>
+
+                <span>Free</span>
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex justify-between text-xl font-bold">
+                  <span>Total</span>
+
+                  <span>
+                    Rp{" "}
+                    {total.toLocaleString(
+                      "id-ID"
+                    )}
+                  </span>
+                </div>
+              </div>
             </div>
-          ))}
 
-          <h3>Total: Rp {total}</h3>
+            <Link
+              href="/checkout"
+              className="mt-6 flex h-12 w-full items-center justify-center rounded-2xl bg-black font-medium text-white transition hover:opacity-90"
+            >
+              Checkout
+            </Link>
 
-          <button onClick={checkout}>
-            Checkout
-          </button>
-        </>
-      )}
+            <p className="mt-4 text-center text-xs text-gray-400">
+              Secure checkout powered
+              by your store
+            </p>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma/client";
 
 export default async function FeaturedProducts() {
   const products = await prisma.product.findMany({

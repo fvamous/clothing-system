@@ -1,38 +1,49 @@
 @import "tailwindcss";
-
-/* OPTIONAL PLUGINS */
 @import "tw-animate-css";
 
-/* BASE VARIABLES */
+/* =========================
+   THEME VARIABLES
+========================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: 255 255 255;
+  --foreground: 23 23 23;
+
+  --card: 255 255 255;
+  --border: 229 231 235;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: 10 10 10;
+  --foreground: 237 237 237;
+
+  --card: 17 17 17;
+  --border: 38 38 38;
 }
 
-/* GLOBAL */
-body {
-  transition: background 0.3s ease, color 0.3s ease;
-}
-
+/* =========================
+   BASE STYLE
+========================= */
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply min-h-screen antialiased;
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   html {
     @apply font-sans;
   }
-  
-  @keyframes toastPop {
+}
+
+/* =========================
+   ANIMATIONS (GLOBAL SAFE)
+========================= */
+@keyframes toastPop {
   0% {
     transform: scale(0.85);
     opacity: 0;

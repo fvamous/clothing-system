@@ -1,84 +1,212 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import {
+  useState,
+  type CSSProperties,
+} from "react";
+
+import Image from "next/image";
+
 import { useCart } from "@/context/CartContext";
 
-export default function CatalogClient({ products }: any) {
-  const router = useRouter();
-  const { addToCart } = useCart();
+import type { Product } from "@/types/product";
 
-  const [selected, setSelected] = useState<any>(null);
+type Props = {
+  products: Product[];
+};
+
+export default function CatalogClient({
+  products,
+}: Props) {
+  const { addToCart } =
+    useCart();
+
+  const [
+    selected,
+    setSelected,
+  ] = useState<Product | null>(
+    null
+  );
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.title}>Catalog</h1>
+      <h1 style={styles.title}>
+        Catalog
+      </h1>
 
       {/* GRID */}
       <div style={styles.grid}>
-        {products.map((item: any) => (
-          <div key={item.id} style={styles.card}>
-            {/* IMAGE */}
-            <div style={styles.imageWrap}>
-              <img
-                src={item.imageUrl || "/placeholder.png"}
-                style={styles.image}
-              />
-            </div>
-
-            {/* INFO */}
-            <div style={styles.info}>
-              <h3 style={styles.name}>{item.name}</h3>
-              <p style={styles.price}>
-                Rp {Number(item.price).toLocaleString("id-ID")}
-              </p>
-            </div>
-
-            {/* ACTION */}
-            <div style={styles.actions}>
-              <button
-                style={styles.viewBtn}
-                onClick={() => setSelected(item)}
-              >
-                View
-              </button>
-
-              <button
-                style={styles.cartBtn}
-                onClick={() =>
-                  addToCart({
-                    id: item.id,
-                    name: item.name,
-                    price: item.price,
-                    imageUrl: item.imageUrl ?? "",
-                  })
+        {products.map(
+          (item) => (
+            <div
+              key={item.id}
+              style={styles.card}
+            >
+              {/* IMAGE */}
+              <div
+                style={
+                  styles.imageWrap
                 }
               >
-                Add
-              </button>
+                <Image
+                  src={
+                    item.imageUrl ||
+                    "/placeholder.png"
+                  }
+                  alt={item.name}
+                  width={500}
+                  height={500}
+                  style={
+                    styles.image
+                  }
+                />
+              </div>
+
+              {/* INFO */}
+              <div
+                style={styles.info}
+              >
+                <h3
+                  style={
+                    styles.name
+                  }
+                >
+                  {item.name}
+                </h3>
+
+                <p
+                  style={
+                    styles.price
+                  }
+                >
+                  Rp{" "}
+                  {Number(
+                    item.price
+                  ).toLocaleString(
+                    "id-ID"
+                  )}
+                </p>
+              </div>
+
+              {/* ACTION */}
+              <div
+                style={
+                  styles.actions
+                }
+              >
+                <button
+                  type="button"
+                  style={
+                    styles.viewBtn
+                  }
+                  onClick={() =>
+                    setSelected(
+                      item
+                    )
+                  }
+                >
+                  View
+                </button>
+
+                <button
+                  type="button"
+                  style={
+                    styles.cartBtn
+                  }
+                  onClick={() =>
+                    addToCart({
+                      id: String(
+                        item.id
+                      ),
+
+                      name:
+                        item.name,
+
+                      price:
+                        Number(
+                          item.price
+                        ),
+
+                      quantity: 1,
+
+                      imageUrl:
+                        item.imageUrl ??
+                        undefined,
+
+                      stock:
+                        item.stock ??
+                        0,
+                    })
+                  }
+                >
+                  Add
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
 
       {/* MODAL */}
       {selected && (
-        <div style={styles.modalOverlay} onClick={() => setSelected(null)}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <img
-              src={selected.imageUrl || "/placeholder.png"}
-              style={styles.modalImage}
+        <div
+          style={
+            styles.modalOverlay
+          }
+          onClick={() =>
+            setSelected(null)
+          }
+        >
+          <div
+            style={
+              styles.modal
+            }
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+            <Image
+              src={
+                selected.imageUrl ||
+                "/placeholder.png"
+              }
+              alt={selected.name}
+              width={500}
+              height={500}
+              style={
+                styles.modalImage
+              }
             />
 
-            <h2 style={{ marginTop: 12 }}>{selected.name}</h2>
+            <h2
+              style={{
+                marginTop: 12,
+              }}
+            >
+              {selected.name}
+            </h2>
 
-            <p style={{ color: "#666" }}>
-              Rp {Number(selected.price).toLocaleString("id-ID")}
+            <p
+              style={{
+                color: "#666",
+              }}
+            >
+              Rp{" "}
+              {Number(
+                selected.price
+              ).toLocaleString(
+                "id-ID"
+              )}
             </p>
 
             <button
-              style={styles.closeBtn}
-              onClick={() => setSelected(null)}
+              type="button"
+              style={
+                styles.closeBtn
+              }
+              onClick={() =>
+                setSelected(null)
+              }
             >
               Close
             </button>
@@ -90,9 +218,13 @@ export default function CatalogClient({ products }: any) {
 }
 
 /* =========================
-   STYLES (UNCHANGED + MODAL)
+   STYLES
 ========================= */
-const styles: Record<string, React.CSSProperties> = {
+
+const styles: Record<
+  string,
+  CSSProperties
+> = {
   page: {
     padding: "2rem",
   },
@@ -105,7 +237,8 @@ const styles: Record<string, React.CSSProperties> = {
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+    gridTemplateColumns:
+      "repeat(auto-fill, minmax(220px, 1fr))",
     gap: 16,
   },
 
@@ -113,12 +246,14 @@ const styles: Record<string, React.CSSProperties> = {
     background: "#fff",
     borderRadius: 14,
     overflow: "hidden",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+    boxShadow:
+      "0 8px 24px rgba(0,0,0,0.06)",
   },
 
   imageWrap: {
     height: 180,
     background: "#f5f5f5",
+    overflow: "hidden",
   },
 
   image: {
@@ -167,17 +302,20 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   /* =========================
-     MODAL (GLASS EFFECT)
+     MODAL
   ========================= */
 
   modalOverlay: {
     position: "fixed",
     inset: 0,
-    background: "rgba(0,0,0,0.4)",
-    backdropFilter: "blur(10px)",
+    background:
+      "rgba(0,0,0,0.4)",
+    backdropFilter:
+      "blur(10px)",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent:
+      "center",
     zIndex: 9999,
   },
 
@@ -187,7 +325,8 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 14,
     padding: 16,
     textAlign: "center",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+    boxShadow:
+      "0 20px 60px rgba(0,0,0,0.2)",
   },
 
   modalImage: {

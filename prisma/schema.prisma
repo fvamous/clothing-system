@@ -8,21 +8,34 @@ datasource db {
 }
 
 model Product {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
+
   name        String
+
+  slug        String   @unique
+
   price       Int
+
   imageUrl    String?
   description String?
-  stock       Int     @default(0)
 
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
+  stock       Int      @default(0)
 
-  orderItems OrderItem[]
+  color       String?
+  material    String?
 
-  isDeleted Boolean @default(false)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
 
-  createdAt DateTime @default(now())
+  orderItems  OrderItem[]
+
+  isDeleted   Boolean  @default(false)
+  deletedAt   DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoryId])
 }
 
 model Category {

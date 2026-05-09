@@ -19,7 +19,7 @@ import { useCart } from "@/context/CartContext";
 
 import CartDrawer from "@/components/cart/CartDrawer";
 
-import DarkToggle from "@/components/DarkToggle";
+import DarkToggle from "@/components/layout/DarkToggle";
 
 export default function Navbar() {
   const { data: session } =
@@ -40,11 +40,12 @@ export default function Navbar() {
     session?.user?.role === "ADMIN";
 
   // =========================
-  // CART COUNT (OPTIMIZED)
+  // CART COUNT
   // =========================
   const cartCount = useMemo(() => {
     return cart.reduce(
-      (acc, item) => acc + item.qty,
+      (acc, item) =>
+        acc + item.quantity,
       0
     );
   }, [cart]);
@@ -86,7 +87,7 @@ export default function Navbar() {
   }, []);
 
   // =========================
-  // BODY LOCK WHEN CART OPEN
+  // BODY LOCK
   // =========================
   useEffect(() => {
     document.body.style.overflow =
@@ -120,9 +121,7 @@ export default function Navbar() {
             : "none",
         }}
       >
-        {/* =========================
-            LEFT (LOGO)
-        ========================= */}
+        {/* LEFT */}
         <div style={styles.left}>
           <Link
             href="/"
@@ -145,9 +144,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* =========================
-            CENTER NAV
-        ========================= */}
+        {/* CENTER */}
         <nav style={styles.nav}>
           <Link
             href="/catalog"
@@ -162,6 +159,7 @@ export default function Navbar() {
             }
             style={styles.cartBtn}
             aria-label="Open cart"
+            type="button"
           >
             Cart
 
@@ -182,15 +180,13 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* =========================
-            RIGHT SECTION
-        ========================= */}
+        {/* RIGHT */}
         <div style={styles.right}>
-          {/* DARK TOGGLE */}
           <DarkToggle />
 
           {!session ? (
             <button
+              type="button"
               onClick={() =>
                 signIn("google")
               }
@@ -205,6 +201,7 @@ export default function Navbar() {
               </span>
 
               <button
+                type="button"
                 onClick={() =>
                   signOut()
                 }
@@ -217,9 +214,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* =========================
-          CART DRAWER
-      ========================= */}
+      {/* CART DRAWER */}
       <CartDrawer
         open={openCart}
         onClose={() =>
@@ -233,6 +228,7 @@ export default function Navbar() {
 /* =========================
    STYLES
 ========================= */
+
 const styles: Record<
   string,
   React.CSSProperties
@@ -422,6 +418,7 @@ const styles: Record<
 
     minWidth: 20,
 
-    textAlign: "center",
+    textAlign:
+      "center" as const,
   },
 };

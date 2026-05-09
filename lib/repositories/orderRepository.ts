@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma/client";
 import { OrderStatus, Prisma } from "@prisma/client";
 
 export const orderRepository = {
