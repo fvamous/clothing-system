@@ -1,9 +1,14 @@
 import { prisma } from "@/lib/infra/prisma/client";
 import { notFound } from "next/navigation";
 
+/* =========================
+   SAFE QUERY
+========================= */
 async function getOrder(id: string) {
+  if (!id) return null;
+
   return prisma.order.findUnique({
-    where: { id }, // ✅ string UUID
+    where: { id: String(id) },
     include: {
       items: {
         include: { product: true },
@@ -12,12 +17,15 @@ async function getOrder(id: string) {
   });
 }
 
+/* =========================
+   PAGE (NEXT 16 FIX)
+========================= */
 export default async function SuccessPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
 
   const order = await getOrder(id);
 

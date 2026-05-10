@@ -1,17 +1,16 @@
 import * as React from "react";
 
-export function Card({
-  className = "",
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+type Props = React.HTMLAttributes<HTMLDivElement>;
+
+export function Card({ className = "", ...props }: Props) {
   return (
     <div
       className={`
-        rounded-2xl
-        border
-        bg-background
-        text-foreground
-        shadow-sm
+        rounded-[28px]
+        border border-white/40
+        bg-white/50
+        backdrop-blur-2xl
+        shadow-[0_20px_60px_rgba(0,0,0,0.08)]
         ${className}
       `}
       {...props}
@@ -19,13 +18,13 @@ export function Card({
   );
 }
 
-export function CardHeader({
-  className = "",
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function CardHeader({ className = "", ...props }: Props) {
   return (
     <div
-      className={`p-6 ${className}`}
+      className={`
+        p-6 pb-4
+        ${className}
+      `}
       {...props}
     />
   );
@@ -38,8 +37,8 @@ export function CardTitle({
   return (
     <h3
       className={`
-        text-lg
-        font-semibold
+        text-lg font-semibold tracking-tight
+        text-gray-900
         ${className}
       `}
       {...props}
@@ -47,10 +46,7 @@ export function CardTitle({
   );
 }
 
-export function CardContent({
-  className = "",
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function CardContent({ className = "", ...props }: Props) {
   return (
     <div
       className={`p-6 pt-0 ${className}`}

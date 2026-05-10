@@ -1,285 +1,392 @@
 "use client";
 
 import Image from "next/image";
-
-import {
-  useRouter,
-} from "next/navigation";
-
-import {
-  ShoppingBag,
-  CreditCard,
-  ArrowLeft,
-} from "lucide-react";
-
+import { useRouter } from "next/navigation";
+import { ShoppingBag, CreditCard, ArrowLeft } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
-import { Button } from "@/components/ui/button";
-
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
 export default function CheckoutPage() {
-  const { cart, totalPrice } =
-    useCart();
-
+  const { cart, totalPrice } = useCart();
   const router = useRouter();
 
   async function handleCheckout() {
     try {
-      const res = await fetch(
-        "/api/checkout",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            items: cart.map((i) => ({
-              productId: i.id,
-              quantity:
-                i.quantity,
-            })),
-          }),
-        }
-      );
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cart.map((i) => ({
+            productId: i.id,
+            quantity: i.quantity,
+          })),
+        }),
+      });
 
       const data = await res.json();
 
-      if (!res.ok) {
-        console.error(
-          "FULL ERROR:",
-          data
-        );
-
-        alert(
-          data.error ||
-            "Checkout failed"
-        );
-
-        return;
-      }
-
-      if (!data.orderId) {
-        console.error(
-          "No orderId returned:",
-          data
-        );
-
-        alert(
-          "Order ID not returned"
-        );
-
-        return;
-      }
-
-      router.push(
-        `/success/${data.orderId}`
-      );
-    } catch (error) {
-      console.error(error);
-
+      if (!res.ok) return alert(data.error || "Checkout failed");
+      router.push(`/success/${data.orderId}`);
+    } catch {
       alert("Checkout failed");
     }
   }
 
-  // =========================
-  // EMPTY CART
-  // =========================
   if (cart.length === 0) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100 p-6">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="p-10">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
-              <ShoppingBag className="h-10 w-10 text-gray-400" />
-            </div>
+      <main style={styles.page}>
+        <div style={styles.emptyCard}>
+          <div style={styles.iconBox}>
+            <ShoppingBag size={32} />
+          </div>
 
-            <h1 className="text-2xl font-bold">
-              Cart Empty
-            </h1>
+          <h1 style={styles.emptyTitle}>Cart Empty</h1>
+          <p style={styles.emptyText}>
+            Add products before checkout
+          </p>
 
-            <p className="mt-2 text-sm text-gray-500">
-              Add products before
-              checkout
-            </p>
-
-            <Button
-              className="mt-6 w-full"
-              onClick={() =>
-                router.push(
-                  "/catalog"
-                )
-              }
-            >
-              Continue Shopping
-            </Button>
-          </CardContent>
-        </Card>
+          <button
+            onClick={() => router.push("/catalog")}
+            style={styles.primaryBtn}
+          >
+            Continue Shopping
+          </button>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
-      <div className="mx-auto max-w-6xl">
+    <main style={styles.page}>
+      <div style={styles.container}>
         {/* HEADER */}
-        <div className="mb-6 flex items-center justify-between">
+        <div style={styles.header}>
           <div>
-            <h1 className="text-3xl font-bold">
-              Checkout
-            </h1>
-
-            <p className="text-sm text-gray-500">
-              Complete your order
-            </p>
+            <h1 style={styles.title}>Checkout</h1>
+            <p style={styles.subtitle}>Complete your order securely</p>
           </div>
 
-          <Button
-            className="bg-gray-200 text-black hover:bg-gray-300"
-            onClick={() =>
-              router.back()
-            }
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
+          <button onClick={() => router.back()} style={styles.backBtn}>
+            <ArrowLeft size={16} />
             Back
-          </Button>
+          </button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* PRODUCT LIST */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle>
-                  Order Items
-                </CardTitle>
-              </CardHeader>
+        <div style={styles.grid}>
+          {/* ITEMS */}
+          <div style={styles.items}>
+            {cart.map((item) => (
+              <div key={item.id} style={styles.itemCard}>
+                <Image
+                  src={item.imageUrl || "/placeholder.png"}
+                  alt={item.name}
+                  width={90}
+                  height={90}
+                  style={styles.img}
+                />
 
-              <CardContent className="space-y-4 p-6">
-                {cart.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-4 rounded-2xl border p-4"
-                  >
-                    <div className="overflow-hidden rounded-2xl bg-gray-100">
-                      <Image
-                        src={
-                          item.imageUrl ||
-                          "/placeholder.png"
-                        }
-                        alt={item.name}
-                        width={100}
-                        height={100}
-                        className="h-24 w-24 object-cover"
-                      />
-                    </div>
+                <div style={styles.itemInfo}>
+                  <h3 style={styles.itemName}>{item.name}</h3>
+                  <p style={styles.itemQty}>Qty {item.quantity}</p>
+                </div>
 
-                    <div className="flex-1">
-                      <h3 className="font-semibold">
-                        {item.name}
-                      </h3>
-
-                      <p className="mt-1 text-sm text-gray-500">
-                        Qty:{" "}
-                        {
-                          item.quantity
-                        }
-                      </p>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="font-semibold">
-                        Rp{" "}
-                        {(
-                          item.price *
-                          item.quantity
-                        ).toLocaleString(
-                          "id-ID"
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                <div style={styles.itemPrice}>
+                  Rp {(item.price * item.quantity).toLocaleString("id-ID")}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* SUMMARY */}
-          <div>
-            <Card className="sticky top-6">
-              <CardHeader className="border-b">
-                <CardTitle>
-                  Summary
-                </CardTitle>
-              </CardHeader>
+          <aside style={styles.summary}>
+            <h2 style={styles.summaryTitle}>Order Summary</h2>
 
-              <CardContent className="space-y-6 p-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">
-                      Items
-                    </span>
+            <div style={styles.line}>
+              <span>Items</span>
+              <span>
+                {cart.reduce((a, i) => a + i.quantity, 0)}
+              </span>
+            </div>
 
-                    <span>
-                      {cart.reduce(
-                        (
-                          acc,
-                          item
-                        ) =>
-                          acc +
-                          item.quantity,
-                        0
-                      )}
-                    </span>
-                  </div>
+            <div style={styles.line}>
+              <span>Shipping</span>
+              <span>Free</span>
+            </div>
 
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">
-                      Shipping
-                    </span>
+            <div style={styles.divider} />
 
-                    <span>
-                      Free
-                    </span>
-                  </div>
+            <div style={styles.total}>
+              <span>Total</span>
+              <span>Rp {totalPrice.toLocaleString("id-ID")}</span>
+            </div>
 
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>
-                        Total
-                      </span>
-
-                      <span>
-                        Rp{" "}
-                        {totalPrice.toLocaleString(
-                          "id-ID"
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={
-                    handleCheckout
-                  }
-                  className="h-12 w-full"
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-
-                  Checkout Now
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+            <button onClick={handleCheckout} style={styles.checkoutBtn}>
+              <CreditCard size={16} />
+              Pay Now
+            </button>
+          </aside>
         </div>
       </div>
     </main>
   );
 }
+const styles: Record<string, React.CSSProperties> = {
+  page: {
+    minHeight: "100vh",
+    padding: "80px 24px",
+
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start",
+
+    background:
+      "radial-gradient(circle at top, #ffffff 0%, #f6f7ff 45%, #fff1f5 100%)",
+  },
+
+  /* =========================
+     MAIN CAPSULE
+  ========================= */
+  container: {
+    width: "100%",
+    maxWidth: 1140,
+    padding: 40,
+
+    borderRadius: 56,
+
+    background: "rgba(255,255,255,0.45)",
+    backdropFilter: "blur(34px)",
+    WebkitBackdropFilter: "blur(34px)",
+
+    border: "1px solid rgba(255,255,255,0.65)",
+
+    boxShadow: "0 60px 160px rgba(0,0,0,0.10)",
+  },
+
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 34,
+  },
+
+  title: {
+    fontSize: 40,
+    fontWeight: 900,
+    letterSpacing: -1,
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: "#64748b",
+    marginTop: 6,
+  },
+
+  backBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+
+    padding: "10px 16px",
+    borderRadius: 999,
+
+    background: "rgba(255,255,255,0.7)",
+    border: "1px solid rgba(255,255,255,0.8)",
+
+    cursor: "pointer",
+    backdropFilter: "blur(16px)",
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 380px",
+    gap: 34,
+    alignItems: "start",
+  },
+
+  /* =========================
+     ITEMS (GLASS CARD UPGRADE)
+  ========================= */
+  items: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 18,
+  },
+
+  itemCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
+
+    padding: 18,
+    borderRadius: 32,
+
+    background:
+      "linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.45))",
+
+    backdropFilter: "blur(26px)",
+
+    border: "1px solid rgba(255,255,255,0.7)",
+
+    boxShadow: "0 18px 50px rgba(0,0,0,0.06)",
+
+    transition: "all .25s ease",
+  },
+
+  img: {
+    borderRadius: 20,
+    objectFit: "cover",
+  },
+
+  itemInfo: {
+    flex: 1,
+  },
+
+  itemName: {
+    fontSize: 15,
+    fontWeight: 800,
+    letterSpacing: -0.2,
+  },
+
+  itemQty: {
+    fontSize: 12,
+    color: "#64748b",
+    marginTop: 2,
+  },
+
+  itemPrice: {
+    fontWeight: 800,
+    fontSize: 14,
+  },
+
+  /* =========================
+     SUMMARY (PREMIUM PANEL)
+  ========================= */
+  summary: {
+    position: "sticky",
+    top: 32,
+
+    padding: 30,
+    borderRadius: 44,
+
+    background:
+      "linear-gradient(135deg, rgba(255,255,255,0.75), rgba(255,255,255,0.55))",
+
+    backdropFilter: "blur(30px)",
+
+    border: "1px solid rgba(255,255,255,0.75)",
+
+    boxShadow: "0 45px 120px rgba(0,0,0,0.10)",
+  },
+
+  summaryTitle: {
+    fontSize: 20,
+    fontWeight: 900,
+    marginBottom: 18,
+  },
+
+  line: {
+    display: "flex",
+    justifyContent: "space-between",
+    fontSize: 14,
+    color: "#475569",
+  },
+
+  divider: {
+    height: 1,
+    background: "rgba(15,23,42,0.08)",
+    margin: "16px 0",
+  },
+
+  total: {
+    display: "flex",
+    justifyContent: "space-between",
+    fontSize: 20,
+    fontWeight: 900,
+  },
+
+  /* =========================
+     CTA BUTTON (LUXURY FEEL)
+  ========================= */
+  checkoutBtn: {
+    marginTop: 22,
+    width: "100%",
+    height: 52,
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+
+    borderRadius: 999,
+
+    background:
+      "linear-gradient(135deg,#0f172a,#111827,#000)",
+
+    color: "#fff",
+    fontWeight: 800,
+
+    border: "1px solid rgba(255,255,255,0.15)",
+
+    boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+
+    cursor: "pointer",
+  },
+
+  /* =========================
+     EMPTY STATE (SOFT LUXURY)
+  ========================= */
+  emptyCard: {
+    maxWidth: 460,
+    padding: 48,
+
+    borderRadius: 56,
+
+    background: "rgba(255,255,255,0.55)",
+    backdropFilter: "blur(34px)",
+
+    border: "1px solid rgba(255,255,255,0.75)",
+
+    boxShadow: "0 60px 140px rgba(0,0,0,0.10)",
+
+    textAlign: "center",
+  },
+
+  iconBox: {
+    width: 70,
+    height: 70,
+
+    margin: "0 auto 18px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    borderRadius: 24,
+
+    background: "rgba(255,255,255,0.7)",
+  },
+
+  emptyTitle: {
+    fontSize: 28,
+    fontWeight: 900,
+  },
+
+  emptyText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: "#64748b",
+  },
+
+  primaryBtn: {
+    marginTop: 20,
+    padding: "12px 20px",
+
+    borderRadius: 999,
+
+    background: "#0f172a",
+    color: "#fff",
+
+    fontWeight: 700,
+    border: "none",
+    cursor: "pointer",
+  },
+};

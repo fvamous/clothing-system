@@ -8,7 +8,10 @@ import {
   Pencil,
   Trash2,
   Package,
+  Sparkles,
 } from "lucide-react";
+
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 
@@ -56,30 +59,91 @@ export default function ProductCard({
   onDelete,
 }: Props) {
   return (
-    <div
+    <motion.div
+      whileHover={{
+        y: -8,
+      }}
+      transition={{
+        duration: 0.25,
+      }}
       className="
         group
+        relative
         overflow-hidden
-        rounded-3xl
+        rounded-[32px]
         border
-        border-gray-200
-        bg-white
-        shadow-sm
+        border-white/40
+        bg-white/70
+        backdrop-blur-xl
+        shadow-[0_10px_40px_rgba(0,0,0,0.06)]
         transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:shadow-2xl
+        duration-500
+        hover:shadow-[0_25px_80px_rgba(255,154,158,0.22)]
       "
     >
+      {/* PREMIUM GLOW */}
+      <div
+        className="
+          absolute
+          inset-0
+          opacity-0
+          transition-opacity
+          duration-500
+          group-hover:opacity-100
+        "
+      >
+        <div
+          className="
+            absolute
+            -right-16
+            -top-16
+            h-44
+            w-44
+            rounded-full
+            bg-pink-300/30
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            absolute
+            -bottom-20
+            -left-10
+            h-40
+            w-40
+            rounded-full
+            bg-violet-300/20
+            blur-3xl
+          "
+        />
+      </div>
+
       {/* IMAGE */}
       <div
         className="
           relative
           aspect-square
           overflow-hidden
-          bg-gray-100
         "
       >
+        {/* OVERLAY */}
+        <div
+          className="
+            absolute
+            inset-0
+            z-10
+            bg-gradient-to-t
+            from-black/30
+            via-transparent
+            to-transparent
+            opacity-0
+            transition-opacity
+            duration-500
+            group-hover:opacity-100
+          "
+        />
+
         <SmartImage
           src={
             product.imageUrl ||
@@ -91,31 +155,32 @@ export default function ProductCard({
             w-full
             object-cover
             transition-transform
-            duration-500
-            group-hover:scale-105
+            duration-700
+            ease-out
+            group-hover:scale-110
           "
         />
 
-        {/* CATEGORY BADGE */}
-        <div className="absolute left-4 top-4">
+        {/* CATEGORY */}
+        <div className="absolute left-4 top-4 z-20">
           <div
             className="
               inline-flex
               items-center
-              gap-1
+              gap-2
               rounded-full
-              bg-black/80
-              px-3
-              py-1
+              border
+              border-white/30
+              bg-black/55
+              px-4
+              py-2
               text-xs
               font-medium
               text-white
-              backdrop-blur
+              backdrop-blur-xl
             "
           >
-            <Package
-              size={12}
-            />
+            <Package size={12} />
 
             <span>
               {product.category ||
@@ -123,35 +188,86 @@ export default function ProductCard({
             </span>
           </div>
         </div>
+
+        {/* FLOATING PREMIUM BADGE */}
+        <div
+          className="
+            absolute
+            right-4
+            top-4
+            z-20
+          "
+        >
+          <div
+            className="
+              flex
+              h-10
+              w-10
+              items-center
+              justify-center
+              rounded-2xl
+              border
+              border-white/40
+              bg-white/20
+              text-white
+              backdrop-blur-xl
+            "
+          >
+            <Sparkles size={16} />
+          </div>
+        </div>
       </div>
 
       {/* CONTENT */}
-      <div className="space-y-5 p-5">
+      <div className="relative z-20 space-y-5 p-6">
         {/* PRODUCT INFO */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h3
             className="
               line-clamp-1
-              text-lg
+              text-xl
               font-semibold
+              tracking-tight
               text-black
             "
           >
             {product.name}
           </h3>
 
-          <p
+          <div
             className="
-              text-2xl
-              font-bold
-              tracking-tight
-              text-black
+              flex
+              items-end
+              justify-between
             "
           >
-            {formatPrice(
-              product.price
-            )}
-          </p>
+            <p
+              className="
+                text-3xl
+                font-bold
+                tracking-tight
+                text-black
+              "
+            >
+              {formatPrice(
+                product.price
+              )}
+            </p>
+
+            <div
+              className="
+                rounded-full
+                bg-emerald-100
+                px-3
+                py-1
+                text-xs
+                font-semibold
+                text-emerald-700
+              "
+            >
+              Ready
+            </div>
+          </div>
         </div>
 
         {/* STOCK */}
@@ -162,38 +278,59 @@ export default function ProductCard({
             justify-between
             rounded-2xl
             border
-            border-gray-200
-            bg-gray-50
+            border-white/40
+            bg-gradient-to-r
+            from-gray-50
+            to-white
             px-4
-            py-3
+            py-4
           "
         >
-          <span
-            className="
-              text-sm
-              font-medium
-              text-gray-500
-            "
-          >
-            Stock
-          </span>
+          <div>
+            <p
+              className="
+                text-xs
+                uppercase
+                tracking-wider
+                text-gray-400
+              "
+            >
+              Inventory
+            </p>
 
-          <span
+            <p
+              className="
+                mt-1
+                text-sm
+                font-medium
+                text-gray-600
+              "
+            >
+              Available stock
+            </p>
+          </div>
+
+          <div
             className="
-              rounded-full
+              flex
+              h-12
+              min-w-[48px]
+              items-center
+              justify-center
+              rounded-2xl
               bg-black
-              px-3
-              py-1
+              px-4
               text-sm
-              font-semibold
+              font-bold
               text-white
+              shadow-lg
             "
           >
             {product.stock}
-          </span>
+          </div>
         </div>
 
-        {/* ACTION */}
+        {/* ACTIONS */}
         <div className="flex gap-3">
           <Link
             href={`/admin/products/${product.id}/edit`}
@@ -202,9 +339,17 @@ export default function ProductCard({
             <Button
               variant="outline"
               className="
-                h-11
+                h-12
                 w-full
-                rounded-xl
+                rounded-2xl
+                border-white/40
+                bg-white/70
+                text-black
+                backdrop-blur-xl
+                transition-all
+                duration-300
+                hover:scale-[1.02]
+                hover:bg-white
               "
             >
               <Pencil
@@ -212,7 +357,7 @@ export default function ProductCard({
                 className="mr-2"
               />
 
-              Edit
+              Edit Product
             </Button>
           </Link>
 
@@ -220,9 +365,12 @@ export default function ProductCard({
             <Button
               variant="danger"
               className="
-                h-11
-                rounded-xl
-                px-4
+                h-12
+                rounded-2xl
+                px-5
+                transition-all
+                duration-300
+                hover:scale-[1.04]
               "
               onClick={() =>
                 onDelete(
@@ -235,6 +383,6 @@ export default function ProductCard({
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

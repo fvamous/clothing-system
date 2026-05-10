@@ -13,7 +13,12 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    if (!body.name) {
+    const name =
+      typeof body?.name === "string"
+        ? body.name.trim()
+        : "";
+
+    if (!name) {
       return NextResponse.json(
         {
           error: "Nama produk wajib",
@@ -27,6 +32,7 @@ export async function POST(req: Request) {
     const completion =
       await client.chat.completions.create({
         model:
+          process.env.LM_STUDIO_MODEL ||
           "qwen2.5-coder-1.5b-instruct",
 
         messages: [
@@ -42,7 +48,7 @@ export async function POST(req: Request) {
 Buat deskripsi ecommerce fashion.
 
 Nama produk:
-${body.name}
+${name}
 
 Aturan:
 - jangan mengarang warna
@@ -62,18 +68,23 @@ Aturan:
     const result =
       completion.choices?.[0]
         ?.message?.content
+        ?.trim()
         ?.replace(/^"|"$/g, "") ||
       "Deskripsi gagal dibuat";
 
     return NextResponse.json({
       result,
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(
+      "[AI_GENERATE_DESCRIPTION]",
+      error
+    );
 
     return NextResponse.json(
       {
-        error: "AI generation failed",
+        error:
+          "AI generation failed",
       },
       {
         status: 500,
