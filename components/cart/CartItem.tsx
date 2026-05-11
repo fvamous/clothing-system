@@ -5,19 +5,24 @@ import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCart } from "@/context/CartContext";
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
-type CartItemProps = {
-  item: {
-    id: string;
-    name: string;
-    price: number;
-    imageUrl?: string;
-    quantity: number;
-  };
-};
-
-export default function CartItem({ item }: CartItemProps) {
+export default function CartItem({ item }: any) {
   const { removeFromCart, increaseQty, decreaseQty } = useCart();
+
+  const { theme, systemTheme } = useTheme();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const isDark = currentTheme === "dark";
 
   const subtotal = item.price * item.quantity;
 
@@ -26,77 +31,161 @@ export default function CartItem({ item }: CartItemProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, scale: 1.01 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      style={styles.card}
+      transition={{ duration: 0.35 }}
+      style={{
+        ...styles.card,
+
+        background: isDark
+          ? "rgba(15,23,42,0.72)"
+          : "rgba(255,255,255,0.72)",
+
+        border: isDark
+          ? "1px solid rgba(255,255,255,0.08)"
+          : "1px solid rgba(255,255,255,0.4)",
+
+        boxShadow: isDark
+          ? "0 14px 40px rgba(0,0,0,0.45)"
+          : "0 14px 40px rgba(15,23,42,0.06)",
+      }}
     >
       <div style={styles.inner}>
-        {/* IMAGE */}
-        <Link href={`/product/${item.id}`} style={styles.imageWrap}>
+        <Link
+          href={`/product/${item.id}`}
+          style={{
+            ...styles.imageWrap,
+
+            background: isDark
+              ? "rgba(255,255,255,0.04)"
+              : "rgba(255,255,255,0.6)",
+
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(0,0,0,0.05)",
+          }}
+        >
           <Image
             src={item.imageUrl || "/file.svg"}
             alt={item.name}
             fill
-            style={styles.image}
+            style={{ objectFit: "cover" }}
           />
         </Link>
 
-        {/* CONTENT */}
         <div style={styles.content}>
-          {/* TOP */}
           <div style={styles.top}>
             <div>
-              <Link href={`/product/${item.id}`} style={styles.name}>
+              <Link
+                href={`/product/${item.id}`}
+                style={{
+                  ...styles.name,
+                  color: isDark ? "#f8fafc" : "#0f172a",
+                }}
+              >
                 {item.name}
               </Link>
 
-              <p style={styles.price}>
+              <p
+                style={{
+                  ...styles.price,
+                  color: isDark ? "#94a3b8" : "#64748b",
+                }}
+              >
                 Rp {item.price.toLocaleString("id-ID")}
               </p>
             </div>
 
             <button
               onClick={() => removeFromCart(item.id)}
-              style={styles.deleteBtn}
-              type="button"
+              style={{
+                ...styles.deleteBtn,
+
+                background: isDark
+                  ? "rgba(255,255,255,0.05)"
+                  : "rgba(255,255,255,0.6)",
+
+                border: isDark
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : "1px solid rgba(255,255,255,0.5)",
+
+                color: isDark ? "#f8fafc" : "#0f172a",
+              }}
             >
               <Trash2 size={16} />
             </button>
           </div>
 
-          {/* BOTTOM */}
           <div style={styles.bottom}>
-            {/* QTY */}
-            <div style={styles.qtyBox}>
-              <button onClick={() => decreaseQty(item.id)} style={styles.qtyBtn}>
+            <div
+              style={{
+                ...styles.qtyBox,
+
+                background: isDark
+                  ? "rgba(255,255,255,0.05)"
+                  : "rgba(255,255,255,0.6)",
+
+                border: isDark
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : "1px solid rgba(0,0,0,0.06)",
+              }}
+            >
+              <button
+                onClick={() => decreaseQty(item.id)}
+                style={{
+                  ...styles.qtyBtn,
+                  color: isDark ? "#f8fafc" : "#0f172a",
+                }}
+              >
                 <Minus size={14} />
               </button>
 
-              <span style={styles.qty}>{item.quantity}</span>
+              <span
+                style={{
+                  ...styles.qty,
+                  color: isDark ? "#f8fafc" : "#0f172a",
+                }}
+              >
+                {item.quantity}
+              </span>
 
-              <button onClick={() => increaseQty(item.id)} style={styles.qtyBtn}>
+              <button
+                onClick={() => increaseQty(item.id)}
+                style={{
+                  ...styles.qtyBtn,
+                  color: isDark ? "#f8fafc" : "#0f172a",
+                }}
+              >
                 <Plus size={14} />
               </button>
             </div>
 
-            {/* SUBTOTAL */}
             <div style={styles.subtotal}>
-              <span style={styles.subLabel}>Subtotal</span>
-              <span style={styles.subValue}>
+              <span
+                style={{
+                  ...styles.subLabel,
+                  color: isDark ? "#64748b" : "#94a3b8",
+                }}
+              >
+                Subtotal
+              </span>
+
+              <span
+                style={{
+                  ...styles.subValue,
+                  color: isDark ? "#f8fafc" : "#0f172a",
+                }}
+              >
                 Rp {subtotal.toLocaleString("id-ID")}
               </span>
             </div>
           </div>
         </div>
       </div>
-
-      {/* glow hover */}
-      <div style={styles.glow} />
     </motion.div>
   );
 }
 
 /* =========================
-   STYLE SYSTEM (CONSISTENT UI)
+   STYLE SYSTEM
 ========================= */
 
 const styles: Record<string, React.CSSProperties> = {
@@ -106,13 +195,8 @@ const styles: Record<string, React.CSSProperties> = {
 
     borderRadius: 28,
 
-    background: "rgba(255,255,255,0.72)",
     backdropFilter: "blur(18px)",
     WebkitBackdropFilter: "blur(18px)",
-
-    border: "1px solid rgba(255,255,255,0.4)",
-
-    boxShadow: "0 14px 40px rgba(15,23,42,0.06)",
 
     padding: 18,
   },
@@ -130,13 +214,6 @@ const styles: Record<string, React.CSSProperties> = {
 
     borderRadius: 22,
     overflow: "hidden",
-
-    background: "rgba(255,255,255,0.6)",
-    border: "1px solid rgba(0,0,0,0.05)",
-  },
-
-  image: {
-    objectFit: "cover",
   },
 
   content: {
@@ -154,13 +231,11 @@ const styles: Record<string, React.CSSProperties> = {
   name: {
     fontSize: 15,
     fontWeight: 700,
-    color: "#0f172a",
     textDecoration: "none",
   },
 
   price: {
     fontSize: 13,
-    color: "#64748b",
     marginTop: 4,
   },
 
@@ -169,9 +244,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: 42,
 
     borderRadius: 14,
-    border: "1px solid rgba(255,255,255,0.5)",
 
-    background: "rgba(255,255,255,0.6)",
     backdropFilter: "blur(14px)",
 
     cursor: "pointer",
@@ -191,9 +264,6 @@ const styles: Record<string, React.CSSProperties> = {
 
     padding: "6px 10px",
     borderRadius: 999,
-
-    background: "rgba(255,255,255,0.6)",
-    border: "1px solid rgba(0,0,0,0.06)",
   },
 
   qtyBtn: {
@@ -214,27 +284,10 @@ const styles: Record<string, React.CSSProperties> = {
 
   subLabel: {
     fontSize: 11,
-    color: "#94a3b8",
   },
 
   subValue: {
     fontSize: 16,
     fontWeight: 800,
-    color: "#0f172a",
-  },
-
-  glow: {
-    position: "absolute",
-    right: -40,
-    top: -40,
-    width: 120,
-    height: 120,
-    borderRadius: "50%",
-
-    background: "rgba(255,154,158,0.25)",
-    filter: "blur(40px)",
-    opacity: 0,
-    transition: "opacity .3s ease",
-    pointerEvents: "none",
   },
 };

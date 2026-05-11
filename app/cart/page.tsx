@@ -1,11 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { useCart } from "@/context/CartContext";
 import CartItem from "@/components/cart/CartItem";
 
 export default function CartPage() {
   const { cart } = useCart();
+  const { theme, systemTheme } = useTheme();
+
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const isDark = currentTheme === "dark";
 
   const total = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -17,15 +22,54 @@ export default function CartPage() {
   ========================= */
   if (cart.length === 0) {
     return (
-      <main style={styles.page}>
-        <div style={styles.emptyCard}>
-          <h1 style={styles.emptyTitle}>Your Cart is Empty</h1>
+      <main
+        style={{
+          ...styles.page,
+          background: isDark
+            ? "radial-gradient(circle at top, #020617 0%, #0f172a 45%, #111827 100%)"
+            : "radial-gradient(circle at top, #ffffff 0%, #f6f7ff 45%, #fff1f5 100%)",
+        }}
+      >
+        <div
+          style={{
+            ...styles.emptyCard,
+            background: isDark
+              ? "rgba(15,23,42,0.72)"
+              : "rgba(255,255,255,0.55)",
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(255,255,255,0.7)",
+            boxShadow: isDark
+              ? "0 45px 120px rgba(0,0,0,0.45)"
+              : "0 45px 120px rgba(0,0,0,0.08)",
+          }}
+        >
+          <h1
+            style={{
+              ...styles.emptyTitle,
+              color: isDark ? "#f8fafc" : "#0f172a",
+            }}
+          >
+            Your Cart is Empty
+          </h1>
 
-          <p style={styles.emptyText}>
+          <p
+            style={{
+              ...styles.emptyText,
+              color: isDark ? "#94a3b8" : "#64748b",
+            }}
+          >
             Discover curated pieces and build your style
           </p>
 
-          <Link href="/catalog" style={styles.emptyBtn}>
+          <Link
+            href="/catalog"
+            style={{
+              ...styles.emptyBtn,
+              background: isDark ? "#f8fafc" : "#0f172a",
+              color: isDark ? "#0f172a" : "#fff",
+            }}
+          >
             Continue Shopping
           </Link>
         </div>
@@ -34,13 +78,46 @@ export default function CartPage() {
   }
 
   return (
-    <main style={styles.page}>
+    <main
+      style={{
+        ...styles.page,
+        background: isDark
+          ? "radial-gradient(circle at top, #020617 0%, #0f172a 45%, #111827 100%)"
+          : "radial-gradient(circle at top, #ffffff 0%, #f6f7ff 45%, #fff1f5 100%)",
+      }}
+    >
       {/* CAPSULE CONTAINER */}
-      <div style={styles.container}>
+      <div
+        style={{
+          ...styles.container,
+          background: isDark
+            ? "rgba(15,23,42,0.65)"
+            : "rgba(255,255,255,0.5)",
+          border: isDark
+            ? "1px solid rgba(255,255,255,0.08)"
+            : "1px solid rgba(255,255,255,0.7)",
+          boxShadow: isDark
+            ? "0 45px 140px rgba(0,0,0,0.45)"
+            : "0 45px 140px rgba(0,0,0,0.08)",
+        }}
+      >
         {/* HEADER */}
         <div style={styles.header}>
-          <h1 style={styles.title}>Shopping Cart</h1>
-          <p style={styles.subtitle}>
+          <h1
+            style={{
+              ...styles.title,
+              color: isDark ? "#f8fafc" : "#0f172a",
+            }}
+          >
+            Shopping Cart
+          </h1>
+
+          <p
+            style={{
+              ...styles.subtitle,
+              color: isDark ? "#94a3b8" : "#6b7280",
+            }}
+          >
             Review your items before checkout
           </p>
         </div>
@@ -55,33 +132,92 @@ export default function CartPage() {
           </div>
 
           {/* SUMMARY CAPSULE */}
-          <div style={styles.summary}>
-            <h2 style={styles.summaryTitle}>Order Summary</h2>
+          <div
+            style={{
+              ...styles.summary,
+              background: isDark
+                ? "rgba(15,23,42,0.78)"
+                : "rgba(255,255,255,0.6)",
+              border: isDark
+                ? "1px solid rgba(255,255,255,0.08)"
+                : "1px solid rgba(255,255,255,0.65)",
+              boxShadow: isDark
+                ? "0 35px 90px rgba(0,0,0,0.45)"
+                : "0 35px 90px rgba(0,0,0,0.08)",
+            }}
+          >
+            <h2
+              style={{
+                ...styles.summaryTitle,
+                color: isDark ? "#f8fafc" : "#0f172a",
+              }}
+            >
+              Order Summary
+            </h2>
 
             <div style={styles.summaryBox}>
-              <div style={styles.row}>
+              <div
+                style={{
+                  ...styles.row,
+                  color: isDark ? "#cbd5e1" : "#475569",
+                }}
+              >
                 <span>Items</span>
                 <span>{cart.length}</span>
               </div>
 
-              <div style={styles.row}>
+              <div
+                style={{
+                  ...styles.row,
+                  color: isDark ? "#cbd5e1" : "#475569",
+                }}
+              >
                 <span>Shipping</span>
                 <span>Free</span>
               </div>
 
-              <div style={styles.divider} />
+              <div
+                style={{
+                  ...styles.divider,
+                  background: isDark
+                    ? "rgba(255,255,255,0.08)"
+                    : "rgba(15,23,42,0.08)",
+                }}
+              />
 
-              <div style={styles.totalRow}>
+              <div
+                style={{
+                  ...styles.totalRow,
+                  color: isDark ? "#f8fafc" : "#0f172a",
+                }}
+              >
                 <span>Total</span>
                 <span>Rp {total.toLocaleString("id-ID")}</span>
               </div>
             </div>
 
-            <Link href="/checkout" style={styles.checkoutBtn}>
+            <Link
+              href="/checkout"
+              style={{
+                ...styles.checkoutBtn,
+                background: isDark
+                  ? "linear-gradient(135deg,#f8fafc,#cbd5e1)"
+                  : "linear-gradient(135deg,#0f172a,#111827)",
+                color: isDark ? "#0f172a" : "#fff",
+                boxShadow: isDark
+                  ? "0 16px 40px rgba(255,255,255,0.08)"
+                  : "0 16px 40px rgba(0,0,0,0.12)",
+              }}
+            >
               Checkout
             </Link>
 
-            <p style={styles.footerText}>
+            <p
+              style={{
+                ...styles.footerText,
+                color: isDark ? "#64748b" : "#94a3b8",
+              }}
+            >
               Secure checkout • encrypted payment
             </p>
           </div>
@@ -103,9 +239,6 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     justifyContent: "center",
     alignItems: "flex-start",
-
-    background:
-      "radial-gradient(circle at top, #ffffff 0%, #f6f7ff 45%, #fff1f5 100%)",
   },
 
   /* OUTER CAPSULE */
@@ -116,13 +249,8 @@ const styles: Record<string, React.CSSProperties> = {
 
     borderRadius: 48,
 
-    background: "rgba(255,255,255,0.5)",
     backdropFilter: "blur(30px)",
     WebkitBackdropFilter: "blur(30px)",
-
-    border: "1px solid rgba(255,255,255,0.7)",
-
-    boxShadow: "0 45px 140px rgba(0,0,0,0.08)",
   },
 
   header: {
@@ -133,13 +261,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 38,
     fontWeight: 850,
     letterSpacing: -0.8,
-    color: "#0f172a",
   },
 
   subtitle: {
     marginTop: 6,
     fontSize: 14,
-    color: "#6b7280",
   },
 
   grid: {
@@ -163,20 +289,14 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 28,
     borderRadius: 36,
 
-    background: "rgba(255,255,255,0.6)",
     backdropFilter: "blur(28px)",
     WebkitBackdropFilter: "blur(28px)",
-
-    border: "1px solid rgba(255,255,255,0.65)",
-
-    boxShadow: "0 35px 90px rgba(0,0,0,0.08)",
   },
 
   summaryTitle: {
     fontSize: 20,
     fontWeight: 850,
     marginBottom: 16,
-    color: "#0f172a",
   },
 
   summaryBox: {
@@ -189,12 +309,10 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     justifyContent: "space-between",
     fontSize: 14,
-    color: "#475569",
   },
 
   divider: {
     height: 1,
-    background: "rgba(15,23,42,0.08)",
     margin: "12px 0",
   },
 
@@ -203,7 +321,6 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "space-between",
     fontSize: 18,
     fontWeight: 800,
-    color: "#0f172a",
   },
 
   checkoutBtn: {
@@ -216,20 +333,14 @@ const styles: Record<string, React.CSSProperties> = {
 
     borderRadius: 999,
 
-    background: "linear-gradient(135deg,#0f172a,#111827)",
-    color: "#fff",
-
     fontWeight: 700,
     textDecoration: "none",
-
-    boxShadow: "0 16px 40px rgba(0,0,0,0.12)",
   },
 
   footerText: {
     marginTop: 14,
     fontSize: 11,
     textAlign: "center",
-    color: "#94a3b8",
   },
 
   /* EMPTY STATE */
@@ -239,13 +350,8 @@ const styles: Record<string, React.CSSProperties> = {
 
     borderRadius: 44,
 
-    background: "rgba(255,255,255,0.55)",
     backdropFilter: "blur(30px)",
     WebkitBackdropFilter: "blur(30px)",
-
-    border: "1px solid rgba(255,255,255,0.7)",
-
-    boxShadow: "0 45px 120px rgba(0,0,0,0.08)",
 
     textAlign: "center",
   },
@@ -253,13 +359,11 @@ const styles: Record<string, React.CSSProperties> = {
   emptyTitle: {
     fontSize: 30,
     fontWeight: 850,
-    color: "#0f172a",
   },
 
   emptyText: {
     marginTop: 10,
     fontSize: 14,
-    color: "#64748b",
   },
 
   emptyBtn: {
@@ -268,9 +372,6 @@ const styles: Record<string, React.CSSProperties> = {
 
     padding: "11px 20px",
     borderRadius: 999,
-
-    background: "#0f172a",
-    color: "#fff",
 
     fontWeight: 600,
     textDecoration: "none",

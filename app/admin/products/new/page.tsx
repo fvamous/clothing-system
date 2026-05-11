@@ -337,292 +337,349 @@ export default function NewProductPage() {
   }
 
   return (
-    <main className="min-h-screen bg-muted/30 p-6">
-      <div className="mx-auto max-w-5xl">
-        <Card className="overflow-hidden border-0 shadow-2xl">
-          <CardHeader className="border-b">
-            <CardTitle className="text-2xl font-bold">
-              Create Product
-            </CardTitle>
-          </CardHeader>
+  <main className="min-h-screen bg-gray-100 p-6 dark:bg-[#020617] transition-colors">
+    <div className="mx-auto max-w-5xl">
+      <Card
+        className="
+          overflow-hidden
+          border-0
+          shadow-2xl
+          bg-white
+          dark:bg-zinc-900
+          dark:border
+          dark:border-white/10
+        "
+      >
+        <CardHeader className="border-b dark:border-white/10">
+          <CardTitle className="text-2xl font-bold dark:text-white">
+            Create Product
+          </CardTitle>
+        </CardHeader>
 
-          <CardContent className="space-y-6 p-6">
-            {/* ERROR */}
-            {error && (
-              <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
-                <AlertCircle className="h-4 w-4" />
+        <CardContent className="space-y-6 p-6">
+          {/* ERROR */}
+          {error && (
+            <div
+              className="
+                flex items-center gap-2 rounded-2xl
+                border border-red-200
+                bg-red-50
+                p-4 text-sm text-red-600
 
-                {error}
-              </div>
-            )}
-
-            {/* IMAGE */}
-            <label className="block cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed border-border bg-background transition hover:border-black">
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={
-                  handleFile
-                }
-              />
-
-              {preview ? (
-                <Image
-                  src={preview}
-                  alt="Product preview"
-                  width={1200}
-                  height={700}
-                  className="h-[320px] w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-[320px] flex-col items-center justify-center gap-3 text-muted-foreground">
-                  <Upload className="h-10 w-10" />
-
-                  <p>
-                    Upload product image
-                  </p>
-                </div>
-              )}
-            </label>
-
-            {/* AI INFO */}
-            {generating && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-
-                AI processing...
-              </div>
-            )}
-
-            {/* FORM */}
-            <form
-              onSubmit={
-                handleSubmit
-              }
-              className="space-y-6"
+                dark:border-red-500/20
+                dark:bg-red-500/10
+                dark:text-red-300
+              "
             >
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Product Name
-                  </label>
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </div>
+          )}
 
-                  <Input
-                    value={name}
-                    onChange={(
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ) =>
-                      setName(
-                        e.target
-                          .value
-                      )
-                    }
-                    placeholder="Oversized Hoodie"
-                  />
-                </div>
+          {/* IMAGE */}
+          <label
+            className="
+              block cursor-pointer overflow-hidden
+              rounded-3xl border-2 border-dashed
+              border-border bg-background
+              transition hover:border-black
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Category
-                  </label>
+              dark:border-white/10
+              dark:bg-zinc-950
+              dark:hover:border-white/30
+            "
+          >
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={handleFile}
+            />
 
-                  <Input
-                    value={
-                      category
-                    }
-                    onChange={(
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ) =>
-                      setCategory(
-                        e.target
-                          .value
-                      )
-                    }
-                    placeholder="Hoodie"
-                  />
-                </div>
+            {preview ? (
+              <Image
+                src={preview}
+                alt="Product preview"
+                width={1200}
+                height={700}
+                className="h-[320px] w-full object-cover"
+              />
+            ) : (
+              <div
+                className="
+                  flex h-[320px] flex-col
+                  items-center justify-center
+                  gap-3 text-muted-foreground
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Color
-                  </label>
-
-                  <Input
-                    value={color}
-                    onChange={(
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ) =>
-                      setColor(
-                        e.target
-                          .value
-                      )
-                    }
-                    placeholder="Black"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Material
-                  </label>
-
-                  <Input
-                    value={
-                      material
-                    }
-                    onChange={(
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ) =>
-                      setMaterial(
-                        e.target
-                          .value
-                      )
-                    }
-                    placeholder="Cotton Fleece"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Stock
-                  </label>
-
-                  <Input
-                    type="number"
-                    value={stock}
-                    onChange={(
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ) =>
-                      setStock(
-                        e.target
-                          .value
-                      )
-                    }
-                    placeholder="100"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Price
-                  </label>
-
-                  <Input
-                    type="number"
-                    value={price}
-                    onChange={(
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ) =>
-                      setPrice(
-                        e.target
-                          .value
-                      )
-                    }
-                    placeholder="250000"
-                  />
-                </div>
+                  dark:text-zinc-400
+                "
+              >
+                <Upload className="h-10 w-10" />
+                <p>Upload product image</p>
               </div>
+            )}
+          </label>
 
-              {/* DESCRIPTION */}
+          {/* AI INFO */}
+          {generating && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-zinc-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              AI processing...
+            </div>
+          )}
+
+          {/* FORM */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6"
+          >
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Description
+                <label className="text-sm font-medium dark:text-zinc-200">
+                  Product Name
                 </label>
 
-                <Textarea
-                  value={
-                    description
-                  }
+                <Input
+                  value={name}
                   onChange={(
-                    e: React.ChangeEvent<HTMLTextAreaElement>
+                    e: React.ChangeEvent<HTMLInputElement>
                   ) =>
-                    setDescription(
-                      e.target
-                        .value
-                    )
+                    setName(e.target.value)
                   }
-                  placeholder="Premium streetwear hoodie..."
-                  className="min-h-[140px]"
+                  placeholder="Oversized Hoodie"
+                  className="
+                    dark:border-white/10
+                    dark:bg-zinc-950
+                    dark:text-white
+                    dark:placeholder:text-zinc-500
+                  "
                 />
               </div>
 
-              {/* AI BUTTON */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium dark:text-zinc-200">
+                  Category
+                </label>
+
+                <Input
+                  value={category}
+                  onChange={(
+                    e: React.ChangeEvent<HTMLInputElement>
+                  ) =>
+                    setCategory(e.target.value)
+                  }
+                  placeholder="Hoodie"
+                  className="
+                    dark:border-white/10
+                    dark:bg-zinc-950
+                    dark:text-white
+                    dark:placeholder:text-zinc-500
+                  "
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium dark:text-zinc-200">
+                  Color
+                </label>
+
+                <Input
+                  value={color}
+                  onChange={(
+                    e: React.ChangeEvent<HTMLInputElement>
+                  ) =>
+                    setColor(e.target.value)
+                  }
+                  placeholder="Black"
+                  className="
+                    dark:border-white/10
+                    dark:bg-zinc-950
+                    dark:text-white
+                    dark:placeholder:text-zinc-500
+                  "
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium dark:text-zinc-200">
+                  Material
+                </label>
+
+                <Input
+                  value={material}
+                  onChange={(
+                    e: React.ChangeEvent<HTMLInputElement>
+                  ) =>
+                    setMaterial(e.target.value)
+                  }
+                  placeholder="Cotton Fleece"
+                  className="
+                    dark:border-white/10
+                    dark:bg-zinc-950
+                    dark:text-white
+                    dark:placeholder:text-zinc-500
+                  "
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium dark:text-zinc-200">
+                  Stock
+                </label>
+
+                <Input
+                  type="number"
+                  value={stock}
+                  onChange={(
+                    e: React.ChangeEvent<HTMLInputElement>
+                  ) =>
+                    setStock(e.target.value)
+                  }
+                  placeholder="100"
+                  className="
+                    dark:border-white/10
+                    dark:bg-zinc-950
+                    dark:text-white
+                    dark:placeholder:text-zinc-500
+                  "
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium dark:text-zinc-200">
+                  Price
+                </label>
+
+                <Input
+                  type="number"
+                  value={price}
+                  onChange={(
+                    e: React.ChangeEvent<HTMLInputElement>
+                  ) =>
+                    setPrice(e.target.value)
+                  }
+                  placeholder="250000"
+                  className="
+                    dark:border-white/10
+                    dark:bg-zinc-950
+                    dark:text-white
+                    dark:placeholder:text-zinc-500
+                  "
+                />
+              </div>
+            </div>
+
+            {/* DESCRIPTION */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium dark:text-zinc-200">
+                Description
+              </label>
+
+              <Textarea
+                value={description}
+                onChange={(
+                  e: React.ChangeEvent<HTMLTextAreaElement>
+                ) =>
+                  setDescription(e.target.value)
+                }
+                placeholder="Premium streetwear hoodie..."
+                className="
+                  min-h-[140px]
+
+                  dark:border-white/10
+                  dark:bg-zinc-950
+                  dark:text-white
+                  dark:placeholder:text-zinc-500
+                "
+              />
+            </div>
+
+            {/* AI BUTTON */}
+            <Button
+              type="button"
+              onClick={handleGenerateAI}
+              disabled={generating}
+              variant="outline"
+              className="
+                w-full
+
+                dark:border-white/10
+                dark:bg-zinc-900
+                dark:text-white
+                dark:hover:bg-zinc-800
+              "
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate Description
+                </>
+              )}
+            </Button>
+
+            {/* SUBMIT */}
+            <div className="flex justify-end">
               <Button
-                type="button"
-                onClick={
-                  handleGenerateAI
-                }
-                disabled={
-                  generating
-                }
-                variant="outline"
-                className="w-full"
+                type="submit"
+                disabled={saving || generating}
+                className="
+                  h-12 px-8
+
+                  dark:bg-white
+                  dark:text-black
+                  dark:hover:bg-zinc-200
+                "
               >
-                {generating ? (
+                {saving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-
-                    Generating...
+                    Saving...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-
-                    Generate Description
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Product
                   </>
                 )}
               </Button>
-
-              {/* SUBMIT */}
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={
-                    saving ||
-                    generating
-                  }
-                  className="h-12 px-8"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-
-                      Save Product
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* SUCCESS */}
-      {success && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-background p-8 text-center shadow-2xl">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
 
-            <h3 className="text-xl font-bold">
-              Product Saved
-            </h3>
+    {/* SUCCESS */}
+    {success && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div
+          className="
+            w-full max-w-sm rounded-3xl
+            bg-background p-8 text-center
+            shadow-2xl
 
-            <p className="mt-2 text-sm text-muted-foreground">
-              Product successfully
-              created
-            </p>
+            dark:bg-zinc-900
+            dark:border
+            dark:border-white/10
+          "
+        >
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/20">
+            <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>
+
+          <h3 className="text-xl font-bold dark:text-white">
+            Product Saved
+          </h3>
+
+          <p className="mt-2 text-sm text-muted-foreground dark:text-zinc-400">
+            Product successfully created
+          </p>
         </div>
-      )}
-    </main>
-  );
-}
+      </div>
+    )}
+  </main>
+)}

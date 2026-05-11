@@ -37,9 +37,6 @@ export default function EditProductPage() {
 
   const id = params.id as string;
 
-  // =========================
-  // FORM
-  // =========================
   const [name, setName] =
     useState("");
 
@@ -67,9 +64,6 @@ export default function EditProductPage() {
   const [preview, setPreview] =
     useState("");
 
-  // =========================
-  // UI STATE
-  // =========================
   const [loading, setLoading] =
     useState(true);
 
@@ -82,9 +76,6 @@ export default function EditProductPage() {
   const [submitting, setSubmitting] =
     useState(false);
 
-  // =========================
-  // MODAL
-  // =========================
   const [errorModal, setErrorModal] =
     useState({
       open: false,
@@ -94,9 +85,6 @@ export default function EditProductPage() {
   const [successModal, setSuccessModal] =
     useState(false);
 
-  // =========================
-  // LOAD PRODUCT
-  // =========================
   useEffect(() => {
     let ignore = false;
 
@@ -171,9 +159,6 @@ export default function EditProductPage() {
     };
   }, [id]);
 
-  // =========================
-  // FILE
-  // =========================
   function handleFile(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
@@ -193,9 +178,6 @@ export default function EditProductPage() {
     );
   }
 
-  // =========================
-  // UPLOAD
-  // =========================
   async function uploadFile(
     image: File
   ) {
@@ -241,9 +223,6 @@ export default function EditProductPage() {
     }
   }
 
-  // =========================
-  // SUBMIT
-  // =========================
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
   ) {
@@ -317,30 +296,26 @@ export default function EditProductPage() {
     }
   }
 
-  // =========================
-  // LOADING
-  // =========================
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-white text-black dark:bg-[#020617] dark:text-white">
         <Loader2 className="h-10 w-10 animate-spin" />
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
+    <main className="min-h-screen bg-gray-100 p-6 text-zinc-900 dark:bg-[#020617] dark:text-zinc-100">
       <div className="mx-auto max-w-5xl">
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b">
+        <Card className="overflow-hidden border border-zinc-200 bg-white dark:border-white/10 dark:bg-[#0f172a]">
+          <CardHeader className="border-b border-zinc-200 dark:border-white/10">
             <CardTitle>
               Edit Product
             </CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* IMAGE */}
-            <div className="overflow-hidden rounded-3xl border bg-gray-100">
+            <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-gray-100 dark:border-white/10 dark:bg-white/5">
               {preview ? (
                 <Image
                   src={preview}
@@ -350,13 +325,12 @@ export default function EditProductPage() {
                   className="h-[320px] w-full object-cover"
                 />
               ) : (
-                <div className="flex h-[320px] items-center justify-center text-gray-400">
+                <div className="flex h-[320px] items-center justify-center text-gray-400 dark:text-zinc-500">
                   No Image
                 </div>
               )}
             </div>
 
-            {/* PROGRESS */}
             {uploading && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
@@ -369,9 +343,9 @@ export default function EditProductPage() {
                   </span>
                 </div>
 
-                <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
                   <div
-                    className="h-full rounded-full bg-black transition-all"
+                    className="h-full rounded-full bg-black transition-all dark:bg-white"
                     style={{
                       width: `${progress}%`,
                     }}
@@ -380,7 +354,6 @@ export default function EditProductPage() {
               </div>
             )}
 
-            {/* FORM */}
             <form
               onSubmit={handleSubmit}
               className="space-y-6"
@@ -498,7 +471,6 @@ export default function EditProductPage() {
                 </div>
               </div>
 
-              {/* DESCRIPTION */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">
                   Description
@@ -518,13 +490,12 @@ export default function EditProductPage() {
                 />
               </div>
 
-              {/* FILE */}
               <div className="space-y-3">
                 <label className="text-sm font-medium">
                   Product Image
                 </label>
 
-                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-3xl border border-dashed p-6 transition hover:bg-gray-50">
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-3xl border border-dashed border-zinc-300 p-6 transition hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/5">
                   <Upload className="h-5 w-5" />
 
                   <span>
@@ -540,7 +511,6 @@ export default function EditProductPage() {
                 </label>
               </div>
 
-              {/* ACTION */}
               <div className="flex justify-end">
                 <Button
                   type="submit"
@@ -570,10 +540,9 @@ export default function EditProductPage() {
         </Card>
       </div>
 
-      {/* ERROR MODAL */}
       {errorModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl dark:border dark:border-white/10 dark:bg-[#0f172a]">
             <div className="mb-4 flex items-center gap-2 text-red-500">
               <XCircle className="h-5 w-5" />
 
@@ -582,7 +551,7 @@ export default function EditProductPage() {
               </h3>
             </div>
 
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-zinc-300">
               {errorModal.message}
             </p>
 
@@ -601,17 +570,16 @@ export default function EditProductPage() {
         </div>
       )}
 
-      {/* SUCCESS MODAL */}
       {successModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl dark:border dark:border-white/10 dark:bg-[#0f172a]">
             <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-500" />
 
             <h3 className="text-xl font-bold">
               Success
             </h3>
 
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-500 dark:text-zinc-400">
               Product updated successfully
             </p>
           </div>

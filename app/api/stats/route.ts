@@ -1,13 +1,6 @@
-import { prisma } from "@/lib/infra/prisma/client";
-import { NextResponse } from "next/server";
+import { getStats } from "@/lib/services/stats.service";
 
 export async function GET() {
-  const customers = await prisma.user.count();
-  const products = await prisma.product.count();
-
-  return NextResponse.json({
-    customers,
-    products,
-    countries: 12, // sementara static (kalau belum ada geo data)
-  });
+  const data = await getStats();
+  return Response.json(data);
 }

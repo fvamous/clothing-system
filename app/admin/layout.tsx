@@ -79,6 +79,8 @@ const styles: Record<
       "linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)",
 
     overflow: "hidden",
+
+    color: "var(--foreground)",
   },
 
   bgGlow1: {
@@ -170,3 +172,34 @@ const styles: Record<
     overflow: "hidden",
   },
 };
+
+/* =========================
+   DARK MODE
+========================= */
+
+if (typeof document !== "undefined") {
+  const dark =
+    document.documentElement.classList.contains(
+      "dark"
+    );
+
+  if (dark) {
+    styles.page.background =
+      "linear-gradient(180deg, #020617 0%, #0f172a 100%)";
+
+    styles.bgGlow1.background =
+      "rgba(59,130,246,0.18)";
+
+    styles.bgGlow2.background =
+      "rgba(168,85,247,0.18)";
+
+    styles.contentCard.background =
+      "rgba(15,23,42,0.72)";
+
+    styles.contentCard.border =
+      "1px solid rgba(255,255,255,0.08)";
+
+    styles.contentCard.boxShadow =
+      "0 20px 60px rgba(0,0,0,0.45)";
+  }
+}

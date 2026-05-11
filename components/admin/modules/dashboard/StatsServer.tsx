@@ -1,20 +1,20 @@
-import { prisma } from "@/lib/infra/prisma/client";
-import StatsCards from "@/components/shared/StatsCards";
+"use client";
 
-export default async function StatsServer() {
-  const [products, orders, users] = await Promise.all([
-    prisma.product.count(),
-    prisma.order.count(),
-    prisma.user.count(),
-  ]);
+import { useEffect, useState } from "react";
+
+export default function StatsServer() {
+  const [stats, setStats] = useState({ products: 0, orders: 0 });
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then(setStats);
+  }, []);
 
   return (
-    <StatsCards
-      items={[
-        { label: "Products", value: products },
-        { label: "Orders", value: orders },
-        { label: "Users", value: users },
-      ]}
-    />
+    <div>
+      <div>Products: {stats.products}</div>
+      <div>Orders: {stats.orders}</div>
+    </div>
   );
 }

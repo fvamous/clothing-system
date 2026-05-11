@@ -1,34 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "next-themes";
 
-export default function Providers({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [mounted, setMounted] = useState(false);
+import CartDrawer from "@/components/cart/CartDrawer";
+import { useCartDrawer } from "@/hooks/useCartDrawer";
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+export default function Providers({ children }: { children: React.ReactNode }) {
+  const { open, close } = useCartDrawer();
 
   return (
     <SessionProvider>
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
-        enableSystem
+        enableSystem={true}
         disableTransitionOnChange
       >
         <CartProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            
+            {children}
+
+            {/* 🔥 GLOBAL CART DRAWER (INI PENTING) */}
+            <CartDrawer open={open} onClose={close} />
+
+          </ToastProvider>
         </CartProvider>
       </ThemeProvider>
     </SessionProvider>

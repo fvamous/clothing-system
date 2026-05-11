@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 
 import {
   Bell,
@@ -22,6 +23,16 @@ type ProductSearch = {
 
 export default function AdminTopNav() {
   const pathname = usePathname();
+
+  const { theme, systemTheme } = useTheme();
+
+  const currentTheme =
+    theme === "system"
+      ? systemTheme
+      : theme;
+
+  const isDark =
+    currentTheme === "dark";
 
   /* =========================
      STATES
@@ -107,7 +118,7 @@ export default function AdminTopNav() {
           Number(data?.count ?? 0)
         );
       } catch {
-        // silent fail
+        //
       }
     }
 
@@ -242,12 +253,42 @@ export default function AdminTopNav() {
 
   return (
     <>
-      <header style={styles.bar}>
+      <header
+        style={{
+          ...styles.bar,
+
+          background: isDark
+            ? "rgba(15,23,42,0.78)"
+            : "rgba(255,255,255,0.78)",
+
+          border: isDark
+            ? "1px solid rgba(255,255,255,0.08)"
+            : "1px solid rgba(15,23,42,0.06)",
+
+          boxShadow: isDark
+            ? "0 20px 40px rgba(0,0,0,0.18)"
+            : "0 20px 40px rgba(15,23,42,0.08)",
+        }}
+      >
         {/* LEFT */}
         <div style={styles.left}>
           <button
             type="button"
-            style={styles.menu}
+            style={{
+              ...styles.menu,
+
+              background: isDark
+                ? "rgba(255,255,255,0.05)"
+                : "rgba(15,23,42,0.04)",
+
+              border: isDark
+                ? "1px solid rgba(255,255,255,0.08)"
+                : "1px solid rgba(15,23,42,0.06)",
+
+              color: isDark
+                ? "#fff"
+                : "#0f172a",
+            }}
             onClick={() =>
               setMobileMenu(
                 !mobileMenu
@@ -257,7 +298,14 @@ export default function AdminTopNav() {
             <Menu size={18} />
           </button>
 
-          <h2 style={styles.title}>
+          <h2
+            style={{
+              ...styles.title,
+              color: isDark
+                ? "#fff"
+                : "#0f172a",
+            }}
+          >
             {title}
           </h2>
 
@@ -268,10 +316,24 @@ export default function AdminTopNav() {
               style={{
                 ...styles.link,
 
+                color: isDark
+                  ? "#94a3b8"
+                  : "#475569",
+
                 ...(isActive(
                   "/admin/products"
                 )
-                  ? styles.active
+                  ? {
+                      ...styles.active,
+
+                      background: isDark
+                        ? "rgba(59,130,246,0.16)"
+                        : "rgba(59,130,246,0.10)",
+
+                      color: isDark
+                        ? "#60a5fa"
+                        : "#2563eb",
+                    }
                   : {}),
               }}
             >
@@ -283,10 +345,24 @@ export default function AdminTopNav() {
               style={{
                 ...styles.link,
 
+                color: isDark
+                  ? "#94a3b8"
+                  : "#475569",
+
                 ...(isActive(
                   "/admin/orders"
                 )
-                  ? styles.active
+                  ? {
+                      ...styles.active,
+
+                      background: isDark
+                        ? "rgba(59,130,246,0.16)"
+                        : "rgba(59,130,246,0.10)",
+
+                      color: isDark
+                        ? "#60a5fa"
+                        : "#2563eb",
+                    }
                   : {}),
               }}
             >
@@ -298,10 +374,24 @@ export default function AdminTopNav() {
               style={{
                 ...styles.link,
 
+                color: isDark
+                  ? "#94a3b8"
+                  : "#475569",
+
                 ...(isActive(
                   "/admin/lookbook"
                 )
-                  ? styles.active
+                  ? {
+                      ...styles.active,
+
+                      background: isDark
+                        ? "rgba(59,130,246,0.16)"
+                        : "rgba(59,130,246,0.10)",
+
+                      color: isDark
+                        ? "#60a5fa"
+                        : "#2563eb",
+                    }
                   : {}),
               }}
             >
@@ -315,12 +405,33 @@ export default function AdminTopNav() {
           style={styles.searchWrapper}
           ref={wrapperRef}
         >
-          <div style={styles.searchBox}>
+          <div
+            style={{
+              ...styles.searchBox,
+
+              background: isDark
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(15,23,42,0.04)",
+
+              border: isDark
+                ? "1px solid rgba(255,255,255,0.06)"
+                : "1px solid rgba(15,23,42,0.06)",
+
+              color: isDark
+                ? "#fff"
+                : "#0f172a",
+            }}
+          >
             <Search size={16} />
 
             <input
               placeholder="Search product..."
-              style={styles.input}
+              style={{
+                ...styles.input,
+                color: isDark
+                  ? "#fff"
+                  : "#0f172a",
+              }}
               value={query}
               onChange={(e) => {
                 setQuery(
@@ -341,15 +452,30 @@ export default function AdminTopNav() {
               results.length >
                 0) && (
               <div
-                style={
-                  styles.dropdown
-                }
+                style={{
+                  ...styles.dropdown,
+
+                  background: isDark
+                    ? "#0f172a"
+                    : "#ffffff",
+
+                  border: isDark
+                    ? "1px solid rgba(255,255,255,0.08)"
+                    : "1px solid rgba(15,23,42,0.06)",
+
+                  boxShadow: isDark
+                    ? "0 20px 50px rgba(0,0,0,0.35)"
+                    : "0 20px 50px rgba(15,23,42,0.10)",
+                }}
               >
                 {loading ? (
                   <div
-                    style={
-                      styles.loading
-                    }
+                    style={{
+                      ...styles.loading,
+                      color: isDark
+                        ? "#cbd5e1"
+                        : "#475569",
+                    }}
                   >
                     Searching...
                   </div>
@@ -361,9 +487,17 @@ export default function AdminTopNav() {
                           item.id
                         }
                         href={`/product/${item.id}`}
-                        style={
-                          styles.item
-                        }
+                        style={{
+                          ...styles.item,
+
+                          color: isDark
+                            ? "#fff"
+                            : "#0f172a",
+
+                          borderBottom: isDark
+                            ? "1px solid rgba(255,255,255,0.05)"
+                            : "1px solid rgba(15,23,42,0.06)",
+                        }}
                         onClick={() => {
                           setOpen(
                             false
@@ -428,7 +562,21 @@ export default function AdminTopNav() {
         <div style={styles.right}>
           <button
             type="button"
-            style={styles.icon}
+            style={{
+              ...styles.icon,
+
+              background: isDark
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(15,23,42,0.04)",
+
+              border: isDark
+                ? "1px solid rgba(255,255,255,0.08)"
+                : "1px solid rgba(15,23,42,0.06)",
+
+              color: isDark
+                ? "#fff"
+                : "#0f172a",
+            }}
           >
             <Bell size={18} />
 
@@ -443,7 +591,14 @@ export default function AdminTopNav() {
             )}
           </button>
 
-          <div style={styles.user}>
+          <div
+            style={{
+              ...styles.user,
+              color: isDark
+                ? "#fff"
+                : "#0f172a",
+            }}
+          >
             👨‍💼 Admin
           </div>
         </div>
@@ -451,10 +606,27 @@ export default function AdminTopNav() {
 
       {/* MOBILE MENU */}
       {mobileMenu && (
-        <div style={styles.mobileMenu}>
+        <div
+          style={{
+            ...styles.mobileMenu,
+
+            background: isDark
+              ? "#0f172a"
+              : "#ffffff",
+
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(15,23,42,0.06)",
+          }}
+        >
           <Link
             href="/admin/products"
-            style={styles.mobileLink}
+            style={{
+              ...styles.mobileLink,
+              color: isDark
+                ? "#fff"
+                : "#0f172a",
+            }}
             onClick={() =>
               setMobileMenu(false)
             }
@@ -464,7 +636,12 @@ export default function AdminTopNav() {
 
           <Link
             href="/admin/orders"
-            style={styles.mobileLink}
+            style={{
+              ...styles.mobileLink,
+              color: isDark
+                ? "#fff"
+                : "#0f172a",
+            }}
             onClick={() =>
               setMobileMenu(false)
             }
@@ -474,7 +651,12 @@ export default function AdminTopNav() {
 
           <Link
             href="/admin/lookbook"
-            style={styles.mobileLink}
+            style={{
+              ...styles.mobileLink,
+              color: isDark
+                ? "#fff"
+                : "#0f172a",
+            }}
             onClick={() =>
               setMobileMenu(false)
             }
@@ -491,37 +673,28 @@ const styles: Record<
   string,
   React.CSSProperties
 > = {
-bar: {
-  position: "sticky",
-  top: 16,
+  bar: {
+    position: "sticky",
+    top: 16,
 
-  zIndex: 30,
+    zIndex: 30,
 
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
 
-  gap: 20,
+    gap: 20,
 
-  padding: "14px 18px",
+    padding: "14px 18px",
 
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter:
-    "blur(20px)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter:
+      "blur(20px)",
 
-  background:
-    "rgba(15,23,42,0.78)",
+    borderRadius: 28,
 
-  border:
-    "1px solid rgba(255,255,255,0.08)",
-
-  borderRadius: 28,
-
-  marginBottom: 16,
-
-  boxShadow:
-    "0 20px 40px rgba(0,0,0,0.18)",
-},
+    marginBottom: 16,
+  },
 
   left: {
     display: "flex",
@@ -539,21 +712,12 @@ bar: {
 
     borderRadius: 12,
 
-    border:
-      "1px solid rgba(255,255,255,0.08)",
-
-    background:
-      "rgba(255,255,255,0.05)",
-
-    color: "#fff",
-
     cursor: "pointer",
   },
 
   title: {
     fontSize: 18,
     fontWeight: 700,
-    color: "#fff",
     whiteSpace: "nowrap",
   },
 
@@ -566,8 +730,6 @@ bar: {
   link: {
     textDecoration: "none",
 
-    color: "#94a3b8",
-
     fontSize: 14,
     fontWeight: 500,
 
@@ -579,10 +741,7 @@ bar: {
   },
 
   active: {
-    background:
-      "rgba(59,130,246,0.16)",
-
-    color: "#60a5fa",
+    fontWeight: 600,
   },
 
   searchWrapper: {
@@ -599,14 +758,6 @@ bar: {
     padding: "10px 14px",
 
     borderRadius: 16,
-
-    background:
-      "rgba(255,255,255,0.06)",
-
-    border:
-      "1px solid rgba(255,255,255,0.06)",
-
-    color: "#fff",
   },
 
   input: {
@@ -616,8 +767,6 @@ bar: {
     outline: "none",
 
     background: "transparent",
-
-    color: "#fff",
 
     fontSize: 14,
   },
@@ -634,20 +783,11 @@ bar: {
 
     borderRadius: 20,
 
-    background: "#0f172a",
-
-    border:
-      "1px solid rgba(255,255,255,0.08)",
-
-    boxShadow:
-      "0 20px 50px rgba(0,0,0,0.35)",
-
     zIndex: 100,
   },
 
   loading: {
     padding: 16,
-    color: "#cbd5e1",
     fontSize: 13,
   },
 
@@ -659,12 +799,7 @@ bar: {
 
     padding: 14,
 
-    color: "#fff",
-
     textDecoration: "none",
-
-    borderBottom:
-      "1px solid rgba(255,255,255,0.05)",
   },
 
   img: {
@@ -689,14 +824,6 @@ bar: {
     justifyContent: "center",
 
     borderRadius: 14,
-
-    border:
-      "1px solid rgba(255,255,255,0.08)",
-
-    background:
-      "rgba(255,255,255,0.06)",
-
-    color: "#fff",
 
     cursor: "pointer",
   },
@@ -725,7 +852,6 @@ bar: {
   },
 
   user: {
-    color: "#fff",
     fontSize: 14,
     fontWeight: 500,
     whiteSpace: "nowrap",
@@ -733,5 +859,9 @@ bar: {
 
   mobileMenu: {
     display: "none",
+  },
+
+  mobileLink: {
+    textDecoration: "none",
   },
 };

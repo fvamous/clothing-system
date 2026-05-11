@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/infra/prisma/client";
-import { randomUUID } from "crypto";
+import {
+  getProducts,
+  createProduct,
+} from "@/lib/services/product.service";
 
 // =========================
 // GET ALL PRODUCTS
 // =========================
 export async function GET() {
-  const products = await prisma.product.findMany({
-    where: {
-      isDeleted: false,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
+  const products = await getProducts();
   return NextResponse.json(products);
 }
 
@@ -31,30 +25,15 @@ export async function POST(req: Request) {
     );
   }
 
-  const slug =
-    body.name
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-") +
-    "-" +
-    randomUUID().slice(0, 6);
-
-  const product = await prisma.product.create({
-    data: {
-      name: body.name,
-      price: Number(body.price),
-      stock: Number(body.stock ?? 0),
-
-      imageUrl: body.imageUrl ?? null,
-      description: body.description ?? null,
-
-      // NEW FIELDS (sesuai schema kamu)
-      categoryId: body.categoryId ?? null,
-      color: body.color ?? null,
-      material: body.material ?? null,
-
-      slug,
-    },
+  const product = await createProduct({
+    name: body.name,
+    price: body.price,
+    stock: body.stock,
+    imageUrl: body.imageUrl,
+    description: body.description,
+    categoryId: body.categoryId,
+    color: body.color,
+    material: body.material,
   });
 
   return NextResponse.json(product);

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "next-themes";
+
 import { useCart } from "@/context/CartContext";
 import type { Product } from "@/types/product";
 
@@ -43,14 +45,41 @@ const modal = {
 
 export default function CatalogClient({ products }: Props) {
   const { addToCart } = useCart();
+  const { theme, systemTheme } = useTheme();
+
   const [selected, setSelected] = useState<Product | null>(null);
 
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const isDark = currentTheme === "dark";
+
   return (
-    <div style={styles.page}>
+    <div
+      style={{
+        ...styles.page,
+        background: isDark
+          ? "linear-gradient(135deg,#020617,#0f172a)"
+          : "linear-gradient(135deg,#fafafa,#f5f7ff)",
+      }}
+    >
       {/* HEADER */}
       <div style={styles.header}>
-        <h1 style={styles.title}>Catalog</h1>
-        <p style={styles.subtitle}>Curated modern fashion collection</p>
+        <h1
+          style={{
+            ...styles.title,
+            color: isDark ? "#fff" : "#111",
+          }}
+        >
+          Catalog
+        </h1>
+
+        <p
+          style={{
+            ...styles.subtitle,
+            color: isDark ? "#94a3b8" : "#666",
+          }}
+        >
+          Curated modern fashion collection
+        </p>
       </div>
 
       {/* GRID */}
@@ -65,7 +94,20 @@ export default function CatalogClient({ products }: Props) {
             key={item.id}
             variants={card}
             whileHover={{ y: -6, scale: 1.02 }}
-            style={styles.card}
+            style={{
+              ...styles.card,
+              background: isDark
+                ? "rgba(15,23,42,0.72)"
+                : "rgba(255,255,255,0.75)",
+
+              border: isDark
+                ? "1px solid rgba(255,255,255,0.08)"
+                : "1px solid rgba(255,255,255,0.4)",
+
+              boxShadow: isDark
+                ? "0 12px 40px rgba(0,0,0,0.4)"
+                : "0 12px 40px rgba(0,0,0,0.06)",
+            }}
           >
             {/* IMAGE */}
             <div style={styles.imageWrap}>
@@ -76,28 +118,70 @@ export default function CatalogClient({ products }: Props) {
                 height={600}
                 style={styles.image}
               />
-              <div style={styles.imageOverlay} />
+
+              <div
+                style={{
+                  ...styles.imageOverlay,
+                  background: isDark
+                    ? "linear-gradient(to top, rgba(0,0,0,0.45), transparent)"
+                    : "linear-gradient(to top, rgba(0,0,0,0.15), transparent)",
+                }}
+              />
             </div>
 
             {/* INFO */}
             <div style={styles.info}>
-              <h3 style={styles.name}>{item.name}</h3>
-              <p style={styles.price}>
+              <h3
+                style={{
+                  ...styles.name,
+                  color: isDark ? "#fff" : "#111",
+                }}
+              >
+                {item.name}
+              </h3>
+
+              <p
+                style={{
+                  ...styles.price,
+                  color: isDark ? "#cbd5e1" : "#444",
+                }}
+              >
                 Rp {Number(item.price).toLocaleString("id-ID")}
               </p>
             </div>
 
-            {/* ACTION (VIEW + ADD PREMIUM SPLIT BUTTON) */}
-            <div style={styles.actions}>
+            {/* ACTION */}
+            <div
+              style={{
+                ...styles.actions,
+                background: isDark
+                  ? "rgba(255,255,255,0.04)"
+                  : "rgba(255,255,255,0.6)",
+
+                border: isDark
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : "1px solid rgba(0,0,0,0.08)",
+              }}
+            >
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setSelected(item)}
-                style={styles.viewBtn}
+                style={{
+                  ...styles.viewBtn,
+                  color: isDark ? "#fff" : "#111",
+                }}
               >
                 View
               </motion.button>
 
-              <div style={styles.divider} />
+              <div
+                style={{
+                  ...styles.divider,
+                  background: isDark
+                    ? "rgba(255,255,255,0.08)"
+                    : "rgba(0,0,0,0.1)",
+                }}
+              />
 
               <motion.button
                 whileTap={{ scale: 0.96 }}
@@ -111,7 +195,11 @@ export default function CatalogClient({ products }: Props) {
                     stock: item.stock ?? 0,
                   })
                 }
-                style={styles.cartBtn}
+                style={{
+                  ...styles.cartBtn,
+                  background: isDark ? "#fff" : "#111",
+                  color: isDark ? "#111" : "#fff",
+                }}
               >
                 Add
               </motion.button>
@@ -136,7 +224,16 @@ export default function CatalogClient({ products }: Props) {
               animate="show"
               exit="exit"
               onClick={(e) => e.stopPropagation()}
-              style={styles.modal}
+              style={{
+                ...styles.modal,
+                background: isDark
+                  ? "rgba(15,23,42,0.92)"
+                  : "rgba(255,255,255,0.9)",
+
+                border: isDark
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : "1px solid rgba(255,255,255,0.4)",
+              }}
             >
               <Image
                 src={selected.imageUrl || "/placeholder.png"}
@@ -146,15 +243,31 @@ export default function CatalogClient({ products }: Props) {
                 style={styles.modalImage}
               />
 
-              <h2 style={styles.modalTitle}>{selected.name}</h2>
+              <h2
+                style={{
+                  ...styles.modalTitle,
+                  color: isDark ? "#fff" : "#111",
+                }}
+              >
+                {selected.name}
+              </h2>
 
-              <p style={styles.modalPrice}>
+              <p
+                style={{
+                  ...styles.modalPrice,
+                  color: isDark ? "#cbd5e1" : "#555",
+                }}
+              >
                 Rp {Number(selected.price).toLocaleString("id-ID")}
               </p>
 
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                style={styles.closeBtn}
+                style={{
+                  ...styles.closeBtn,
+                  background: isDark ? "#fff" : "#111",
+                  color: isDark ? "#111" : "#fff",
+                }}
                 onClick={() => setSelected(null)}
               >
                 Close
@@ -168,14 +281,14 @@ export default function CatalogClient({ products }: Props) {
 }
 
 /* =========================
-   STYLES (FIXED + PREMIUM SYSTEM)
+   STYLES
 ========================= */
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
     padding: "32px",
-    background: "linear-gradient(135deg,#fafafa,#f5f7ff)",
     minHeight: "100vh",
+    transition: "all .3s ease",
   },
 
   header: {
@@ -189,7 +302,6 @@ const styles: Record<string, React.CSSProperties> = {
 
   subtitle: {
     fontSize: 14,
-    color: "#666",
     marginTop: 6,
   },
 
@@ -200,12 +312,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   card: {
-    background: "rgba(255,255,255,0.75)",
     borderRadius: 22,
     overflow: "hidden",
-    boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
-    border: "1px solid rgba(255,255,255,0.4)",
     backdropFilter: "blur(18px)",
+    transition: "all .3s ease",
   },
 
   imageWrap: {
@@ -223,7 +333,6 @@ const styles: Record<string, React.CSSProperties> = {
   imageOverlay: {
     position: "absolute",
     inset: 0,
-    background: "linear-gradient(to top, rgba(0,0,0,0.15), transparent)",
   },
 
   info: {
@@ -237,8 +346,8 @@ const styles: Record<string, React.CSSProperties> = {
 
   price: {
     fontSize: 14,
-    color: "#444",
     fontWeight: 600,
+    marginTop: 4,
   },
 
   actions: {
@@ -246,8 +355,6 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     borderRadius: 999,
     overflow: "hidden",
-    background: "rgba(255,255,255,0.6)",
-    border: "1px solid rgba(0,0,0,0.08)",
     margin: "0 14px 14px",
     backdropFilter: "blur(16px)",
   },
@@ -266,8 +373,6 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     padding: "10px 12px",
     border: "none",
-    background: "#111",
-    color: "#fff",
     cursor: "pointer",
     fontWeight: 700,
     fontSize: 13,
@@ -276,7 +381,6 @@ const styles: Record<string, React.CSSProperties> = {
   divider: {
     width: 1,
     height: "60%",
-    background: "rgba(0,0,0,0.1)",
   },
 
   modalOverlay: {
@@ -288,11 +392,11 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     justifyContent: "center",
     zIndex: 9999,
+    padding: 20,
   },
 
   modal: {
     width: 380,
-    background: "rgba(255,255,255,0.9)",
     borderRadius: 24,
     padding: 16,
     textAlign: "center",
@@ -314,7 +418,6 @@ const styles: Record<string, React.CSSProperties> = {
 
   modalPrice: {
     marginTop: 4,
-    color: "#555",
     fontWeight: 600,
   },
 
@@ -323,8 +426,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "10px 14px",
     borderRadius: 999,
     border: "none",
-    background: "#111",
-    color: "#fff",
     cursor: "pointer",
+    fontWeight: 700,
   },
 };

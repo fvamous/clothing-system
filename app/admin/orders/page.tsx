@@ -127,9 +127,13 @@ export default async function OrdersPage() {
 const styles: Record<string, React.CSSProperties> = {
   page: {
     padding: "2rem",
-    background: "#f9fafb",
+
+    background: "var(--background)",
+
     minHeight: "100vh",
     fontFamily: "sans-serif",
+
+    color: "var(--foreground)",
   },
 
   header: {
@@ -139,10 +143,12 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: 26,
     fontWeight: 700,
+
+    color: "var(--foreground)",
   },
 
   subtitle: {
-    color: "#666",
+    color: "var(--muted-foreground)",
     fontSize: 14,
   },
 
@@ -153,10 +159,18 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   card: {
-    background: "#fff",
+    background: "rgba(255,255,255,0.72)",
+
+    border: "1px solid rgba(255,255,255,0.12)",
+
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+
     borderRadius: 14,
     padding: 16,
-    boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
+
+    boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+
     display: "flex",
     flexDirection: "column",
     gap: 10,
@@ -171,11 +185,13 @@ const styles: Record<string, React.CSSProperties> = {
   orderId: {
     fontSize: 16,
     fontWeight: 700,
+
+    color: "var(--foreground)",
   },
 
   text: {
     fontSize: 13,
-    color: "#444",
+    color: "var(--muted-foreground)",
   },
 
   items: {
@@ -187,16 +203,24 @@ const styles: Record<string, React.CSSProperties> = {
   itemCard: {
     display: "flex",
     flexDirection: "column",
-    border: "1px solid #eee",
+
+    border: "1px solid rgba(148,163,184,0.14)",
+
     borderRadius: 10,
     overflow: "hidden",
+
+    background: "rgba(255,255,255,0.42)",
+
+    backdropFilter: "blur(14px)",
+    WebkitBackdropFilter: "blur(14px)",
   },
 
   image: {
     width: "100%",
     height: 140,
     objectFit: "cover",
-    background: "#f3f4f6",
+
+    background: "rgba(148,163,184,0.08)",
   },
 
   itemDetail: {
@@ -206,17 +230,21 @@ const styles: Record<string, React.CSSProperties> = {
   itemName: {
     fontSize: 14,
     fontWeight: 600,
+
+    color: "var(--foreground)",
   },
 
   itemMeta: {
     fontSize: 12,
-    color: "#666",
+    color: "var(--muted-foreground)",
   },
 
   total: {
     fontWeight: 700,
     fontSize: 14,
     marginTop: 6,
+
+    color: "var(--foreground)",
   },
 
   action: {

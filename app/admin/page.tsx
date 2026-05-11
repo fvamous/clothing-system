@@ -25,20 +25,41 @@ export default async function AdminPage() {
 
   return (
     <div>
-      <h1>Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold dark:text-white">
+        Admin Dashboard
+      </h1>
 
-      <p>Welcome, {session.user.name}</p>
+      <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+        Welcome, {session.user.name}
+      </p>
 
-      <div style={styles.card}>
-        <h3>Quick Stats</h3>
+      <div
+        style={styles.card}
+        className="
+          dark:border
+          dark:border-white/10
+        "
+      >
+        <h3 className="text-lg font-semibold dark:text-white">
+          Quick Stats
+        </h3>
 
-        <p>Total Products: {totalProducts}</p>
-        <p>Total Orders: {totalOrders}</p>
+        <div className="mt-4 space-y-2">
+          <p className="text-zinc-700 dark:text-zinc-300">
+            Total Products: {totalProducts}
+          </p>
 
-        <p>
-          Total Revenue: Rp{" "}
-          {(totalRevenue._sum.total ?? 0).toLocaleString("id-ID")}
-        </p>
+          <p className="text-zinc-700 dark:text-zinc-300">
+            Total Orders: {totalOrders}
+          </p>
+
+          <p className="text-zinc-700 dark:text-zinc-300">
+            Total Revenue: Rp{" "}
+            {(totalRevenue._sum.total ?? 0).toLocaleString(
+              "id-ID"
+            )}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -48,8 +69,42 @@ const styles: Record<string, React.CSSProperties> = {
   card: {
     marginTop: 20,
     padding: 16,
-    background: "#fff",
-    borderRadius: 10,
-    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+
+    background:
+      "rgba(255,255,255,0.75)",
+
+    borderRadius: 18,
+
+    border:
+      "1px solid rgba(255,255,255,0.7)",
+
+    backdropFilter: "blur(18px)",
+
+    boxShadow:
+      "0 10px 30px rgba(0,0,0,0.06)",
+
+    color: "var(--foreground)",
   },
 };
+
+/* =========================
+   DARK MODE
+========================= */
+
+if (typeof document !== "undefined") {
+  const dark =
+    document.documentElement.classList.contains(
+      "dark"
+    );
+
+  if (dark) {
+    styles.card.background =
+      "rgba(15,23,42,0.72)";
+
+    styles.card.border =
+      "1px solid rgba(255,255,255,0.08)";
+
+    styles.card.boxShadow =
+      "0 10px 30px rgba(0,0,0,0.35)";
+  }
+}

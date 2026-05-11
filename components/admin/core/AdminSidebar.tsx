@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 import {
   LayoutDashboard,
@@ -12,6 +14,21 @@ import {
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+
+  const { theme, systemTheme } = useTheme();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const currentTheme =
+    theme === "system" ? systemTheme : theme;
+
+  const isDark = currentTheme === "dark";
 
   const isActive = (path: string) => {
     if (path === "/admin") {
@@ -48,18 +65,56 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside style={styles.sidebar}>
+    <aside
+      style={{
+        ...styles.sidebar,
+
+        background: isDark
+          ? "linear-gradient(180deg, #0f172a 0%, #111827 100%)"
+          : "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+
+        borderRight: isDark
+          ? "1px solid rgba(255,255,255,0.06)"
+          : "1px solid rgba(15,23,42,0.06)",
+
+        boxShadow: isDark
+          ? "0 20px 50px rgba(15,23,42,0.35)"
+          : "0 20px 50px rgba(15,23,42,0.08)",
+      }}
+    >
       {/* TOP */}
       <div style={styles.top}>
-        <div style={styles.logoWrap}>
+        <div
+          style={{
+            ...styles.logoWrap,
+
+            background: isDark
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(255,255,255,0.75)",
+
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(15,23,42,0.06)",
+          }}
+        >
           <div style={styles.logoCircle}>EV</div>
 
           <div>
-            <h2 style={styles.logo}>
+            <h2
+              style={{
+                ...styles.logo,
+                color: isDark ? "#fff" : "#0f172a",
+              }}
+            >
               EV Admin
             </h2>
 
-            <p style={styles.subLogo}>
+            <p
+              style={{
+                ...styles.subLogo,
+                color: isDark ? "#94a3b8" : "#64748b",
+              }}
+            >
               Premium Dashboard
             </p>
           </div>
@@ -75,8 +130,28 @@ export default function AdminSidebar() {
             style={{
               ...styles.link,
 
+              color: isActive(menu.href)
+                ? isDark
+                  ? "#fff"
+                  : "#0f172a"
+                : isDark
+                ? "#94a3b8"
+                : "#64748b",
+
               ...(isActive(menu.href)
-                ? styles.active
+                ? {
+                    background: isDark
+                      ? "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.22))"
+                      : "linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.10))",
+
+                    border: isDark
+                      ? "1px solid rgba(255,255,255,0.08)"
+                      : "1px solid rgba(15,23,42,0.08)",
+
+                    boxShadow: isDark
+                      ? "0 12px 30px rgba(59,130,246,0.15)"
+                      : "0 12px 30px rgba(59,130,246,0.08)",
+                  }
                 : {}),
             }}
           >
@@ -91,17 +166,39 @@ export default function AdminSidebar() {
 
       {/* BOTTOM */}
       <div style={styles.bottom}>
-        <div style={styles.bottomCard}>
+        <div
+          style={{
+            ...styles.bottomCard,
+
+            background: isDark
+              ? "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))"
+              : "linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65))",
+
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(15,23,42,0.06)",
+          }}
+        >
           <div style={styles.bottomGlow} />
 
-          <p style={styles.bottomTitle}>
+          <p
+            style={{
+              ...styles.bottomTitle,
+              color: isDark ? "#fff" : "#0f172a",
+            }}
+          >
             System Status
           </p>
 
           <div style={styles.statusRow}>
             <span style={styles.statusDot} />
 
-            <span style={styles.statusText}>
+            <span
+              style={{
+                ...styles.statusText,
+                color: isDark ? "#cbd5e1" : "#475569",
+              }}
+            >
               All services running
             </span>
           </div>
@@ -128,20 +225,11 @@ const styles: Record<
 
     padding: 18,
 
-    background:
-      "linear-gradient(180deg, #0f172a 0%, #111827 100%)",
-
-    borderRight:
-      "1px solid rgba(255,255,255,0.06)",
-
     boxSizing: "border-box",
     borderRadius: 32,
 
     overflow: "hidden",
-
-    boxShadow:
-    "0 20px 50px rgba(15,23,42,0.35)",
-},
+  },
 
   top: {
     marginBottom: 24,
@@ -155,12 +243,6 @@ const styles: Record<
     padding: 14,
 
     borderRadius: 24,
-
-    background:
-      "rgba(255,255,255,0.06)",
-
-    border:
-      "1px solid rgba(255,255,255,0.08)",
 
     backdropFilter: "blur(18px)",
   },
@@ -190,8 +272,6 @@ const styles: Record<
   logo: {
     margin: 0,
 
-    color: "#fff",
-
     fontSize: 16,
     fontWeight: 700,
   },
@@ -200,8 +280,6 @@ const styles: Record<
     margin: "3px 0 0",
 
     fontSize: 12,
-
-    color: "#94a3b8",
   },
 
   nav: {
@@ -221,8 +299,6 @@ const styles: Record<
 
     borderRadius: 18,
 
-    color: "#94a3b8",
-
     textDecoration: "none",
 
     fontSize: 14,
@@ -232,19 +308,6 @@ const styles: Record<
 
     border:
       "1px solid transparent",
-  },
-
-  active: {
-    color: "#fff",
-
-    background:
-      "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.22))",
-
-    border:
-      "1px solid rgba(255,255,255,0.08)",
-
-    boxShadow:
-      "0 12px 30px rgba(59,130,246,0.15)",
   },
 
   icon: {
@@ -266,12 +329,6 @@ const styles: Record<
     padding: 18,
 
     borderRadius: 26,
-
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))",
-
-    border:
-      "1px solid rgba(255,255,255,0.08)",
 
     backdropFilter: "blur(18px)",
 
@@ -304,8 +361,6 @@ const styles: Record<
 
     position: "relative",
 
-    color: "#fff",
-
     fontSize: 15,
     fontWeight: 700,
   },
@@ -331,7 +386,6 @@ const styles: Record<
   },
 
   statusText: {
-    color: "#cbd5e1",
     fontSize: 13,
   },
 };

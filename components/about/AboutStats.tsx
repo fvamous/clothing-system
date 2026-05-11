@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import GlassCard from "@/components/ui/GlassCard";
+import { Text } from "@/components/ui/Text";
 
 type Stats = {
   customers: number;
@@ -8,12 +11,22 @@ type Stats = {
   countries: number;
 };
 
+const defaultStats: Stats = {
+  customers: 0,
+  products: 0,
+  countries: 12,
+};
+
 export default function AboutStats() {
-  const [stats, setStats] = useState<Stats>({
-    customers: 0,
-    products: 0,
-    countries: 12, // fallback sementara
-  });
+  const { theme, systemTheme } = useTheme();
+
+  const [mounted, setMounted] = useState(false);
+  const [stats, setStats] = useState<Stats>(defaultStats);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchStats() {
@@ -22,38 +35,79 @@ export default function AboutStats() {
         const data = await res.json();
 
         setStats({
-          customers: data.customers,
-          products: data.products,
-          countries: data.countries ?? 12,
+          customers: Number(data?.customers ?? 0),
+          products: Number(data?.products ?? 0),
+          countries: Number(data?.countries ?? 12),
         });
       } catch (err) {
         console.error("Failed stats load", err);
+
+        setStats(defaultStats);
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchStats();
   }, []);
 
-  return (
-    <section style={styles.wrapper}>
-      <div style={styles.grid}>
+  if (!mounted) return null;
 
-        <StatCard
-          value={`${stats.customers.toLocaleString()}+`}
+  const currentTheme =
+    theme === "system"
+      ? systemTheme
+      : theme;
+
+  const isDark = currentTheme === "dark";
+
+  const format = (n: number) =>
+    Number(n ?? 0).toLocaleString();
+
+  return (
+    <section
+      style={{
+        ...styles.wrapper,
+
+        // ✅ DARK SECTION
+        background: isDark
+          ? "linear-gradient(to bottom, #020617, #0f172a)"
+          : "transparent",
+
+        borderRadius: isDark ? 40 : 0,
+
+        padding: isDark
+          ? "70px 24px"
+          : "0 20px",
+      }}
+    >
+      <div style={styles.grid}>
+        <StatBox
+          isDark={isDark}
+          loading={loading}
+          value={format(stats.customers)}
           label="Happy Customers"
         />
 
-        <StatCard
-          value={`${stats.products}+`}
-          label="Premium Products"
+        <StatBox
+          isDark={isDark}
+          loading={loading}
+          value={format(stats.products)}
+          label="Products"
         />
 
-        <StatCard
-          value={`${stats.countries}+`}
-          label="Countries Reached"
+        <StatBox
+          isDark={isDark}
+          loading={loading}
+          value={format(stats.countries)}
+          label="Countries"
         />
 
-        <StatCard value="24/7" label="Support System" />
+        <StatBox
+          isDark={isDark}
+          loading={false}
+          value="24/7"
+          label="Support"
+        />
       </div>
     </section>
   );
@@ -63,59 +117,81 @@ export default function AboutStats() {
    CARD
 ========================= */
 
-function StatCard({
+function StatBox({
   value,
   label,
+  isDark,
+  loading,
 }: {
   value: string;
   label: string;
+  isDark: boolean;
+  loading: boolean;
 }) {
   return (
-    <div style={styles.card}>
-      <h3 style={styles.value}>{value}</h3>
-      <p style={styles.label}>{label}</p>
-    </div>
+    <GlassCard>
+      <div
+        style={{
+          ...styles.card,
+
+          background: isDark
+            ? "rgba(15,23,42,0.72)"
+            : "rgba(255,255,255,0.6)",
+
+          border: isDark
+            ? "1px solid rgba(255,255,255,0.06)"
+            : "1px solid rgba(0,0,0,0.06)",
+
+          color: isDark ? "#fff" : "#111",
+
+          boxShadow: isDark
+            ? "0 14px 40px rgba(0,0,0,0.35)"
+            : "0 8px 20px rgba(0,0,0,0.05)",
+        }}
+      >
+        <Text size="lg">
+          {loading ? "..." : `${value}+`}
+        </Text>
+
+        <Text muted>
+          {label}
+        </Text>
+      </div>
+    </GlassCard>
   );
 }
 
 /* =========================
-   STYLE
+   STYLE BASE
 ========================= */
 
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     marginTop: 80,
-    padding: "0 20px",
   },
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-    gap: 16,
-    maxWidth: 900,
+
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(180px, 1fr))",
+
+    gap: 18,
+
+    maxWidth: 1000,
     margin: "0 auto",
   },
 
   card: {
-    padding: 20,
-    borderRadius: 18,
-    background: "rgba(255,255,255,0.6)",
-    backdropFilter: "blur(14px)",
-    border: "1px solid rgba(0,0,0,0.06)",
+    padding: 28,
+
+    borderRadius: 24,
+
+    backdropFilter: "blur(18px)",
+    WebkitBackdropFilter: "blur(18px)",
+
     textAlign: "center",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
-  },
 
-  value: {
-    fontSize: 24,
-    fontWeight: 700,
-    color: "#111",
-  },
-
-  label: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 6,
-    letterSpacing: 0.5,
+    transition: "all 0.3s ease",
   },
 };

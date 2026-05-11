@@ -2,9 +2,22 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { Upload, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { useTheme } from "next-themes";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Upload,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 
 type LookbookItem = {
@@ -21,6 +34,21 @@ export default function AdminLookbook() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
+  const [mounted, setMounted] = useState(false);
+
+  const { theme, systemTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme =
+    theme === "system"
+      ? systemTheme
+      : theme;
+
+  const isDark = currentTheme === "dark";
+
   // =========================
   // LOAD DATA
   // =========================
@@ -33,8 +61,11 @@ export default function AdminLookbook() {
   // =========================
   // FILE HANDLER
   // =========================
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFile(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
     const selected = e.target.files?.[0];
+
     if (!selected) return;
 
     if (!selected.type.startsWith("image/")) {
@@ -45,6 +76,7 @@ export default function AdminLookbook() {
     setFile(selected);
 
     const reader = new FileReader();
+
     reader.onload = () => {
       setPreview(reader.result as string);
     };
@@ -66,6 +98,7 @@ export default function AdminLookbook() {
       setError("");
 
       const formData = new FormData();
+
       formData.append("file", file);
 
       const res = await fetch("/api/lookbook", {
@@ -76,7 +109,9 @@ export default function AdminLookbook() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Upload failed");
+        throw new Error(
+          data?.error || "Upload failed"
+        );
       }
 
       setItems((prev) => [data, ...prev]);
@@ -85,7 +120,10 @@ export default function AdminLookbook() {
       setFile(null);
       setPreview("");
 
-      setTimeout(() => setSuccess(false), 1500);
+      setTimeout(
+        () => setSuccess(false),
+        1500
+      );
     } catch (err: any) {
       setError(err.message || "Upload error");
     } finally {
@@ -93,15 +131,43 @@ export default function AdminLookbook() {
     }
   }
 
+  if (!mounted) return null;
+
   // =========================
   // UI
   // =========================
   return (
-    <main className="min-h-screen bg-muted/30 p-6">
+    <main
+      className="min-h-screen p-6"
+      style={{
+        background: isDark
+          ? "linear-gradient(180deg,#020617 0%,#0f172a 100%)"
+          : undefined,
+      }}
+    >
       <div className="mx-auto max-w-5xl space-y-6">
 
         {/* HEADER */}
-        <Card className="border-0 shadow-xl">
+        <Card
+          className="border shadow-xl"
+          style={{
+            background: isDark
+              ? "rgba(15,23,42,0.72)"
+              : undefined,
+
+            borderColor: isDark
+              ? "rgba(255,255,255,0.08)"
+              : undefined,
+
+            backdropFilter: isDark
+              ? "blur(24px)"
+              : undefined,
+
+            color: isDark
+              ? "#fff"
+              : undefined,
+          }}
+        >
           <CardHeader>
             <CardTitle className="text-2xl font-bold">
               Lookbook CMS
@@ -112,15 +178,46 @@ export default function AdminLookbook() {
 
             {/* ERROR */}
             {error && (
-              <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+              <div
+                className="flex items-center gap-2 rounded-2xl p-3 text-sm"
+                style={{
+                  background: isDark
+                    ? "rgba(127,29,29,0.35)"
+                    : "#fef2f2",
+
+                  border: isDark
+                    ? "1px solid rgba(248,113,113,0.25)"
+                    : "1px solid #fecaca",
+
+                  color: isDark
+                    ? "#fca5a5"
+                    : "#dc2626",
+                }}
+              >
                 <AlertCircle className="h-4 w-4" />
                 {error}
               </div>
             )}
 
             {/* UPLOAD AREA */}
-            <label className="block cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed border-border bg-background transition hover:border-black">
-              <input type="file" hidden accept="image/*" onChange={handleFile} />
+            <label
+              className="block cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed transition"
+              style={{
+                borderColor: isDark
+                  ? "rgba(255,255,255,0.12)"
+                  : undefined,
+
+                background: isDark
+                  ? "rgba(255,255,255,0.03)"
+                  : undefined,
+              }}
+            >
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleFile}
+              />
 
               {preview ? (
                 <Image
@@ -131,7 +228,14 @@ export default function AdminLookbook() {
                   className="h-[320px] w-full object-cover"
                 />
               ) : (
-                <div className="flex h-[320px] flex-col items-center justify-center gap-3 text-muted-foreground">
+                <div
+                  className="flex h-[320px] flex-col items-center justify-center gap-3"
+                  style={{
+                    color: isDark
+                      ? "#94a3b8"
+                      : undefined,
+                  }}
+                >
                   <Upload className="h-10 w-10" />
                   <p>Upload Lookbook Image</p>
                 </div>
@@ -142,7 +246,18 @@ export default function AdminLookbook() {
             <Button
               onClick={handleUpload}
               disabled={uploading}
-              className="w-full h-12"
+              className="h-12 w-full"
+              style={{
+                background: isDark
+                  ? "linear-gradient(135deg,#1e293b,#0f172a)"
+                  : undefined,
+
+                border: isDark
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : undefined,
+
+                color: "#fff",
+              }}
             >
               {uploading ? (
                 <>
@@ -157,11 +272,20 @@ export default function AdminLookbook() {
         </Card>
 
         {/* GRID */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {items.map((item) => (
             <div
               key={item.id}
-              className="relative h-[220px] overflow-hidden rounded-2xl bg-gray-100 shadow"
+              className="relative h-[220px] overflow-hidden rounded-2xl shadow"
+              style={{
+                background: isDark
+                  ? "rgba(15,23,42,0.65)"
+                  : "#f3f4f6",
+
+                border: isDark
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : undefined,
+              }}
             >
               <Image
                 src={item.imageUrl}
@@ -175,11 +299,48 @@ export default function AdminLookbook() {
 
         {/* SUCCESS MODAL */}
         {success && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="rounded-3xl bg-white p-8 text-center shadow-xl">
-              <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-green-600" />
-              <h3 className="text-lg font-bold">Uploaded</h3>
-              <p className="text-sm text-muted-foreground">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{
+              background: isDark
+                ? "rgba(0,0,0,0.65)"
+                : "rgba(0,0,0,0.4)",
+            }}
+          >
+            <div
+              className="rounded-3xl p-8 text-center shadow-xl"
+              style={{
+                background: isDark
+                  ? "rgba(15,23,42,0.92)"
+                  : "#fff",
+
+                border: isDark
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : undefined,
+
+                color: isDark
+                  ? "#fff"
+                  : "#111",
+
+                backdropFilter: isDark
+                  ? "blur(24px)"
+                  : undefined,
+              }}
+            >
+              <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-green-500" />
+
+              <h3 className="text-lg font-bold">
+                Uploaded
+              </h3>
+
+              <p
+                className="text-sm"
+                style={{
+                  color: isDark
+                    ? "#94a3b8"
+                    : undefined,
+                }}
+              >
                 Lookbook image added
               </p>
             </div>
