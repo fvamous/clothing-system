@@ -1,36 +1,13 @@
-import { openrouter } from "@/lib/infra/ai/openrouter";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
+export async function POST(
+  request: NextRequest
+) {
+  const body = await request.json();
 
-    const message =
-      body?.data?.message?.conversation || "";
+  console.log("WHATSAPP WEBHOOK", body);
 
-    const reply = await openrouter.call([
-      {
-        role: "system",
-        content: "Kamu customer service toko fashion profesional.",
-      },
-      {
-        role: "user",
-        content: message,
-      },
-    ]);
-
-    // TODO: kirim ke WhatsApp API
-
-    return Response.json({
-      success: true,
-      reply,
-    });
-  } catch (err: any) {
-    return Response.json(
-      {
-        success: false,
-        error: err?.message || "Webhook error",
-      },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    success: true,
+  });
 }

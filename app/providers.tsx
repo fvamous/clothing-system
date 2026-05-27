@@ -1,34 +1,26 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
-import { CartProvider } from "@/context/CartContext";
-import { ToastProvider } from "@/context/ToastContext";
-import { ThemeProvider } from "next-themes";
+import ThemeProvider from "@/components/providers/ThemeProvider";
 
-import CartDrawer from "@/components/cart/CartDrawer";
-import { useCartDrawer } from "@/hooks/useCartDrawer";
+import SessionProvider from "@/components/providers/SessionProvider";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-  const { open, close } = useCartDrawer();
+import ToastProvider from "@/components/providers/ToastProvider";
 
+import QueryProvider from "@/components/providers/QueryProvider";
+
+export default function Providers({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <SessionProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem={true}
-        disableTransitionOnChange
-      >
-        <CartProvider>
+      <ThemeProvider>
+        <QueryProvider>
           <ToastProvider>
-            
             {children}
-
-            {/* 🔥 GLOBAL CART DRAWER (INI PENTING) */}
-            <CartDrawer open={open} onClose={close} />
-
           </ToastProvider>
-        </CartProvider>
+        </QueryProvider>
       </ThemeProvider>
     </SessionProvider>
   );

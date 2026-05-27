@@ -2,22 +2,13 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSafeTheme } from "@/hooks/ui/useSafeTheme";
 
 export default function AboutHero() {
-  const { theme } = useTheme();
-
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { isDark, mounted } = useSafeTheme();
 
   // ✅ prevent hydration mismatch
   if (!mounted) return null;
-
-  const isDark = theme === "dark";
 
   return (
     <section

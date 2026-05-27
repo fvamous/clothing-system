@@ -1,293 +1,118 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { Minus, Plus, Trash2 } from "lucide-react";
-import { motion } from "framer-motion";
+
+import type { CartItem as TCartItem } from "@/types/entities/cart";
+
 import { useCart } from "@/context/CartContext";
-import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 
-export default function CartItem({ item }: any) {
-  const { removeFromCart, increaseQty, decreaseQty } = useCart();
+type CartItemProps = {
+  item: TCartItem;
+};
 
-  const { theme, systemTheme } = useTheme();
-
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  const currentTheme = theme === "system" ? systemTheme : theme;
-  const isDark = currentTheme === "dark";
-
-  const subtotal = item.price * item.quantity;
+export default function CartItem({
+  item,
+}: CartItemProps) {
+  const {
+    increaseQty,
+    decreaseQty,
+    removeFromCart,
+  } = useCart();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4, scale: 1.01 }}
-      transition={{ duration: 0.35 }}
-      style={{
-        ...styles.card,
-
-        background: isDark
-          ? "rgba(15,23,42,0.72)"
-          : "rgba(255,255,255,0.72)",
-
-        border: isDark
-          ? "1px solid rgba(255,255,255,0.08)"
-          : "1px solid rgba(255,255,255,0.4)",
-
-        boxShadow: isDark
-          ? "0 14px 40px rgba(0,0,0,0.45)"
-          : "0 14px 40px rgba(15,23,42,0.06)",
-      }}
+    <div
+      className="
+        flex
+        gap-4
+        rounded-3xl
+        border
+        border-white/10
+        bg-white/5
+        p-4
+      "
     >
-      <div style={styles.inner}>
-        <Link
-          href={`/product/${item.id}`}
-          style={{
-            ...styles.imageWrap,
-
-            background: isDark
-              ? "rgba(255,255,255,0.04)"
-              : "rgba(255,255,255,0.6)",
-
-            border: isDark
-              ? "1px solid rgba(255,255,255,0.08)"
-              : "1px solid rgba(0,0,0,0.05)",
-          }}
-        >
+      <div
+        className="
+          relative
+          h-24
+          w-20
+          overflow-hidden
+          rounded-2xl
+          bg-zinc-100
+          dark:bg-zinc-900
+        "
+      >
+        {item.imageUrl ? (
           <Image
-            src={item.imageUrl || "/file.svg"}
+            src={item.imageUrl}
             alt={item.name}
             fill
-            style={{ objectFit: "cover" }}
+            className="object-cover"
+            sizes="80px"
           />
-        </Link>
-
-        <div style={styles.content}>
-          <div style={styles.top}>
-            <div>
-              <Link
-                href={`/product/${item.id}`}
-                style={{
-                  ...styles.name,
-                  color: isDark ? "#f8fafc" : "#0f172a",
-                }}
-              >
-                {item.name}
-              </Link>
-
-              <p
-                style={{
-                  ...styles.price,
-                  color: isDark ? "#94a3b8" : "#64748b",
-                }}
-              >
-                Rp {item.price.toLocaleString("id-ID")}
-              </p>
-            </div>
-
-            <button
-              onClick={() => removeFromCart(item.id)}
-              style={{
-                ...styles.deleteBtn,
-
-                background: isDark
-                  ? "rgba(255,255,255,0.05)"
-                  : "rgba(255,255,255,0.6)",
-
-                border: isDark
-                  ? "1px solid rgba(255,255,255,0.08)"
-                  : "1px solid rgba(255,255,255,0.5)",
-
-                color: isDark ? "#f8fafc" : "#0f172a",
-              }}
-            >
-              <Trash2 size={16} />
-            </button>
+        ) : (
+          <div
+            className="
+              flex
+              h-full
+              items-center
+              justify-center
+              text-xs
+              text-zinc-400
+            "
+          >
+            No Image
           </div>
+        )}
+      </div>
 
-          <div style={styles.bottom}>
-            <div
-              style={{
-                ...styles.qtyBox,
+      <div className="flex flex-1 flex-col">
+        <h3 className="font-medium">
+          {item.name}
+        </h3>
 
-                background: isDark
-                  ? "rgba(255,255,255,0.05)"
-                  : "rgba(255,255,255,0.6)",
+        <p className="mt-1 text-sm text-zinc-500">
+          Rp{" "}
+          {item.price.toLocaleString(
+            "id-ID"
+          )}
+        </p>
 
-                border: isDark
-                  ? "1px solid rgba(255,255,255,0.08)"
-                  : "1px solid rgba(0,0,0,0.06)",
-              }}
-            >
-              <button
-                onClick={() => decreaseQty(item.id)}
-                style={{
-                  ...styles.qtyBtn,
-                  color: isDark ? "#f8fafc" : "#0f172a",
-                }}
-              >
-                <Minus size={14} />
-              </button>
+        <div className="mt-auto flex items-center gap-3">
+          <button
+            onClick={() =>
+              decreaseQty(item.productId)
+            }
+            className="h-8 w-8 rounded-xl border"
+          >
+            -
+          </button>
 
-              <span
-                style={{
-                  ...styles.qty,
-                  color: isDark ? "#f8fafc" : "#0f172a",
-                }}
-              >
-                {item.quantity}
-              </span>
+          <span>{item.quantity}</span>
 
-              <button
-                onClick={() => increaseQty(item.id)}
-                style={{
-                  ...styles.qtyBtn,
-                  color: isDark ? "#f8fafc" : "#0f172a",
-                }}
-              >
-                <Plus size={14} />
-              </button>
-            </div>
+          <button
+            onClick={() =>
+              increaseQty(item.productId)
+            }
+            className="h-8 w-8 rounded-xl border"
+          >
+            +
+          </button>
 
-            <div style={styles.subtotal}>
-              <span
-                style={{
-                  ...styles.subLabel,
-                  color: isDark ? "#64748b" : "#94a3b8",
-                }}
-              >
-                Subtotal
-              </span>
-
-              <span
-                style={{
-                  ...styles.subValue,
-                  color: isDark ? "#f8fafc" : "#0f172a",
-                }}
-              >
-                Rp {subtotal.toLocaleString("id-ID")}
-              </span>
-            </div>
-          </div>
+          <button
+            onClick={() =>
+              removeFromCart(item.productId)
+            }
+            className="
+              ml-auto
+              text-sm
+              text-red-500
+            "
+          >
+            Remove
+          </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
-
-/* =========================
-   STYLE SYSTEM
-========================= */
-
-const styles: Record<string, React.CSSProperties> = {
-  card: {
-    position: "relative",
-    overflow: "hidden",
-
-    borderRadius: 28,
-
-    backdropFilter: "blur(18px)",
-    WebkitBackdropFilter: "blur(18px)",
-
-    padding: 18,
-  },
-
-  inner: {
-    display: "flex",
-    gap: 16,
-  },
-
-  imageWrap: {
-    position: "relative",
-    width: 110,
-    height: 110,
-    flexShrink: 0,
-
-    borderRadius: 22,
-    overflow: "hidden",
-  },
-
-  content: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-  },
-
-  top: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-
-  name: {
-    fontSize: 15,
-    fontWeight: 700,
-    textDecoration: "none",
-  },
-
-  price: {
-    fontSize: 13,
-    marginTop: 4,
-  },
-
-  deleteBtn: {
-    width: 42,
-    height: 42,
-
-    borderRadius: 14,
-
-    backdropFilter: "blur(14px)",
-
-    cursor: "pointer",
-  },
-
-  bottom: {
-    marginTop: "auto",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  qtyBox: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-
-    padding: "6px 10px",
-    borderRadius: 999,
-  },
-
-  qtyBtn: {
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-  },
-
-  qty: {
-    minWidth: 24,
-    textAlign: "center",
-    fontWeight: 600,
-  },
-
-  subtotal: {
-    textAlign: "right",
-  },
-
-  subLabel: {
-    fontSize: 11,
-  },
-
-  subValue: {
-    fontSize: 16,
-    fontWeight: 800,
-  },
-};

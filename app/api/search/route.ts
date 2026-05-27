@@ -1,18 +1,52 @@
+import { NextRequest, NextResponse } from "next/server";
+
 import { prisma } from "@/lib/infra/prisma/client";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const query = searchParams.get("q") || "";
+import { handleApiError } from "@/lib/errors/ApiError";
 
-  const products = await prisma.product.findMany({
-    where: {
-      name: {
-        contains: query,
-        mode: "insensitive",
-      },
-    },
-    take: 10,
-  });
+export async function GET(
+  request: NextRequest
+) {
+  try {
+    const search =
+      request.nextUrl.searchParams.get("q");
 
-  return Response.json({ products });
+    if (!search) {
+      return NextResponse.json({
+        success: true,
+        data: [],
+      });
+    }
+
+    const products =
+      await prisma.product.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+            {
+              description: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          ],
+
+          isDeleted: false,
+        },
+
+        take: 20,
+      });
+
+    return NextResponse.json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

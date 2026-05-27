@@ -1,28 +1,14 @@
 import { z } from "zod";
 
-export const orderItemSchema =
+export const createOrderSchema =
   z.object({
-    productId: z
-      .number({
-        message:
-          "Product ID required",
+    items: z.array(
+      z.object({
+        productId: z.string(),
+
+        quantity: z.number().min(1),
       })
-      .positive(),
+    ),
 
-    quantity: z
-      .number({
-        message:
-          "Quantity required",
-      })
-      .min(1),
+    total: z.number().min(1),
   });
-
-export const checkoutSchema =
-  z.object({
-    items: z
-      .array(orderItemSchema)
-      .min(1),
-  });
-
-export type CheckoutInput =
-  z.infer<typeof checkoutSchema>;

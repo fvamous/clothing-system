@@ -1,40 +1,47 @@
-import { NextResponse } from "next/server";
-import {
-  getProducts,
-  createProduct,
-} from "@/lib/services/product.service";
+import { NextRequest, NextResponse } from "next/server";
 
-// =========================
-// GET ALL PRODUCTS
-// =========================
+import { productService } from "@/lib/domain/products/service";
+
+import { handleApiError } from "@/lib/errors/ApiError";
+
+import { createProductSchema } from "@/lib/validations/product";
+
 export async function GET() {
-  const products = await getProducts();
-  return NextResponse.json(products);
+  try {
+    const products =
+      await productService.getAll();
+
+    return NextResponse.json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }
 
-// =========================
-// CREATE PRODUCT
-// =========================
-export async function POST(req: Request) {
-  const body = await req.json();
+export async function POST(
+  request: NextRequest
+) {
+  try {
+    const body = await request.json();
 
-  if (!body.name || !body.price) {
+    const validated =
+      createProductSchema.parse(body);
+
+    const product =
+      await productService.create(validated);
+
     return NextResponse.json(
-      { error: "name & price required" },
-      { status: 400 }
+      {
+        success: true,
+        data: product,
+      },
+      {
+        status: 201,
+      }
     );
+  } catch (error) {
+    return handleApiError(error);
   }
-
-  const product = await createProduct({
-    name: body.name,
-    price: body.price,
-    stock: body.stock,
-    imageUrl: body.imageUrl,
-    description: body.description,
-    categoryId: body.categoryId,
-    color: body.color,
-    material: body.material,
-  });
-
-  return NextResponse.json(product);
 }

@@ -1,18 +1,15 @@
 import { z } from "zod";
 
-export const ProductSchema = z.object({
-  name: z.string(),
-  price: z.number(),
-  stock: z.number(),
+export const createProductSchema = z.object({
+  name: z.string().min(3),
 
-  // ❌ HAPUS INI:
-  // category: z.string().optional(),
+  slug: z.string().min(3),
 
-  // ✅ GANTI INI:
-  categoryId: z.string().optional(),
+  price: z.number().min(1),
 
-  color: z.string().optional(),
-  material: z.string().optional(),
-  description: z.string().optional(),
+  stock: z.number().min(0),
+
   imageUrl: z.string().optional(),
+
+  description: z.string().optional(),
 });

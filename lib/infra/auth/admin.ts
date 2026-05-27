@@ -1,27 +1,20 @@
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/infra/auth/authOptions";
+import { redirect } from "next/navigation";
+
+import { authOptions } from "./authOptions";
 
 export async function requireAdmin() {
   const session =
-    await getServerSession(
-      authOptions
-    );
+    await getServerSession(authOptions);
 
   if (!session?.user) {
-    throw new Error(
-      "Unauthorized"
-    );
+    redirect("/login");
   }
 
-  if (
-    session.user.role !==
-    "ADMIN"
-  ) {
-    throw new Error(
-      "Forbidden"
-    );
+  if (session.user.role !== "ADMIN") {
+    redirect("/");
   }
 
-  return session.user;
+  return session;
 }

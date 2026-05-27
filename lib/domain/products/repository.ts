@@ -1,35 +1,77 @@
-import { prisma } from "@/lib/infra/prisma/client";
 import { Prisma } from "@prisma/client";
 
+import { prisma } from "@/lib/infra/prisma/client";
+
 export const productRepository = {
-  findAll: () => {
+  findAll() {
     return prisma.product.findMany({
-      where: { isDeleted: false },
-      orderBy: { createdAt: "desc" },
+      where: {
+        isDeleted: false,
+      },
+
+      include: {
+        category: true,
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   },
 
-  findById: (id: string) => {
-    return prisma.product.findFirst({
-      where: { id, isDeleted: false },
+  findById(id: string) {
+    return prisma.product.findUnique({
+      where: {
+        id,
+      },
+
+      include: {
+        category: true,
+      },
     });
   },
 
-  create: (data: Prisma.ProductCreateInput) => {
-    return prisma.product.create({ data });
+  findBySlug(slug: string) {
+    return prisma.product.findUnique({
+      where: {
+        slug,
+      },
+
+      include: {
+        category: true,
+      },
+    });
   },
 
-  update: (id: string, data: Prisma.ProductUpdateInput) => {
-    return prisma.product.update({
-      where: { id },
+  create(data: Prisma.ProductCreateInput) {
+    return prisma.product.create({
       data,
     });
   },
 
-  delete: (id: string) => {
+  update(
+    id: string,
+    data: Prisma.ProductUpdateInput
+  ) {
     return prisma.product.update({
-      where: { id },
-      data: { isDeleted: true },
+      where: {
+        id,
+      },
+
+      data,
+    });
+  },
+
+  remove(id: string) {
+    return prisma.product.update({
+      where: {
+        id,
+      },
+
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
     });
   },
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 import Image from "next/image";
 
@@ -13,9 +13,14 @@ import {
   Upload,
   AlertCircle,
   CheckCircle2,
+  Wand2,
+  Package2,
+  Shirt,
+  Palette,
+  Boxes,
 } from "lucide-react";
 
-import useProtected from "@/hooks/useProtected";
+import { useProtected } from "@/hooks/auth/useProtected";
 
 import {
   Card,
@@ -30,56 +35,67 @@ import Input from "@/components/ui/input";
 
 import Textarea from "@/components/ui/textarea";
 
+type AIAnalyzeResult = {
+  name?: string;
+  category?: string;
+  color?: string;
+  material?: string;
+  description?: string;
+};
+
 export default function NewProductPage() {
   useProtected();
 
   const router = useRouter();
 
   // =========================
-  // FORM STATE
+  // FORM
   // =========================
+
   const [name, setName] =
-    useState("");
+    useState<string>("");
 
   const [price, setPrice] =
-    useState("");
+    useState<string>("");
 
   const [category, setCategory] =
-    useState("");
+    useState<string>("");
 
   const [color, setColor] =
-    useState("");
+    useState<string>("");
 
   const [material, setMaterial] =
-    useState("");
+    useState<string>("");
 
   const [stock, setStock] =
-    useState("");
+    useState<string>("");
 
   const [description, setDescription] =
-    useState("");
+    useState<string>("");
 
   const [preview, setPreview] =
-    useState("");
+    useState<string>("");
 
   // =========================
   // UI STATE
   // =========================
+
   const [saving, setSaving] =
-    useState(false);
+    useState<boolean>(false);
 
   const [generating, setGenerating] =
-    useState(false);
+    useState<boolean>(false);
 
   const [error, setError] =
-    useState("");
+    useState<string>("");
 
   const [success, setSuccess] =
-    useState(false);
+    useState<boolean>(false);
 
   // =========================
-  // AI IMAGE ANALYZE
+  // AI ANALYZE
   // =========================
+
   async function handleAnalyzeImage(
     imageBase64: string
   ) {
@@ -92,10 +108,12 @@ export default function NewProductPage() {
         "/api/ai/vision-product",
         {
           method: "POST",
+
           headers: {
             "Content-Type":
               "application/json",
           },
+
           body: JSON.stringify({
             image: imageBase64,
           }),
@@ -104,13 +122,14 @@ export default function NewProductPage() {
 
       if (!res.ok) {
         throw new Error(
-          "AI image analyze failed"
+          "AI analyze failed"
         );
       }
 
       const data = await res.json();
 
-      let parsed: any = null;
+      let parsed: AIAnalyzeResult | null =
+        null;
 
       try {
         parsed =
@@ -121,24 +140,26 @@ export default function NewProductPage() {
               )
             : data.result;
       } catch {
-        return;
+        parsed = null;
       }
 
-      if (parsed?.name) {
+      if (!parsed) return;
+
+      if (parsed.name) {
         setName(parsed.name);
       }
 
-      if (parsed?.category) {
+      if (parsed.category) {
         setCategory(
           parsed.category
         );
       }
 
-      if (parsed?.color) {
+      if (parsed.color) {
         setColor(parsed.color);
       }
 
-      if (parsed?.material) {
+      if (parsed.material) {
         setMaterial(
           parsed.material
         );
@@ -146,16 +167,17 @@ export default function NewProductPage() {
 
       if (
         !description &&
-        parsed?.description
+        parsed.description
       ) {
         setDescription(
           parsed.description
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError(
-        error.message ||
-          "AI error"
+        error instanceof Error
+          ? error.message
+          : "AI error"
       );
     } finally {
       setGenerating(false);
@@ -165,6 +187,7 @@ export default function NewProductPage() {
   // =========================
   // FILE HANDLER
   // =========================
+
   function handleFile(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
@@ -205,8 +228,9 @@ export default function NewProductPage() {
   }
 
   // =========================
-  // GENERATE DESCRIPTION
+  // AI DESCRIPTION
   // =========================
+
   async function handleGenerateAI() {
     try {
       setGenerating(true);
@@ -225,10 +249,12 @@ export default function NewProductPage() {
         "/api/ai/generate-description",
         {
           method: "POST",
+
           headers: {
             "Content-Type":
               "application/json",
           },
+
           body: JSON.stringify({
             name,
             category,
@@ -254,10 +280,11 @@ export default function NewProductPage() {
               data.result
             )
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError(
-        error.message ||
-          "AI error"
+        error instanceof Error
+          ? error.message
+          : "AI error"
       );
     } finally {
       setGenerating(false);
@@ -265,8 +292,9 @@ export default function NewProductPage() {
   }
 
   // =========================
-  // SUBMIT PRODUCT
+  // SUBMIT
   // =========================
+
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
   ) {
@@ -289,20 +317,29 @@ export default function NewProductPage() {
         "/api/products",
         {
           method: "POST",
+
           headers: {
             "Content-Type":
               "application/json",
           },
+
           body: JSON.stringify({
             name,
+
             price:
-              Number(price),
+              Number(price) || 0,
+
             stock:
               Number(stock) || 0,
+
             category,
+
             color,
+
             material,
+
             description,
+
             imageUrl: preview,
           }),
         }
@@ -326,10 +363,11 @@ export default function NewProductPage() {
 
         router.refresh();
       }, 1400);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError(
-        error.message ||
-          "Failed save"
+        error instanceof Error
+          ? error.message
+          : "Failed save"
       );
     } finally {
       setSaving(false);
@@ -337,349 +375,836 @@ export default function NewProductPage() {
   }
 
   return (
-  <main className="min-h-screen bg-gray-100 p-6 dark:bg-[#020617] transition-colors">
-    <div className="mx-auto max-w-5xl">
-      <Card
+    <section className="relative overflow-hidden">
+      {/* BACKGROUND */}
+      <div
         className="
+          pointer-events-none
+          absolute
+          inset-0
           overflow-hidden
-          border-0
-          shadow-2xl
-          bg-white
-          dark:bg-zinc-900
-          dark:border
-          dark:border-white/10
         "
       >
-        <CardHeader className="border-b dark:border-white/10">
-          <CardTitle className="text-2xl font-bold dark:text-white">
-            Create Product
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="space-y-6 p-6">
-          {/* ERROR */}
-          {error && (
-            <div
-              className="
-                flex items-center gap-2 rounded-2xl
-                border border-red-200
-                bg-red-50
-                p-4 text-sm text-red-600
-
-                dark:border-red-500/20
-                dark:bg-red-500/10
-                dark:text-red-300
-              "
-            >
-              <AlertCircle className="h-4 w-4" />
-              {error}
-            </div>
-          )}
-
-          {/* IMAGE */}
-          <label
-            className="
-              block cursor-pointer overflow-hidden
-              rounded-3xl border-2 border-dashed
-              border-border bg-background
-              transition hover:border-black
-
-              dark:border-white/10
-              dark:bg-zinc-950
-              dark:hover:border-white/30
-            "
-          >
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleFile}
-            />
-
-            {preview ? (
-              <Image
-                src={preview}
-                alt="Product preview"
-                width={1200}
-                height={700}
-                className="h-[320px] w-full object-cover"
-              />
-            ) : (
-              <div
-                className="
-                  flex h-[320px] flex-col
-                  items-center justify-center
-                  gap-3 text-muted-foreground
-
-                  dark:text-zinc-400
-                "
-              >
-                <Upload className="h-10 w-10" />
-                <p>Upload product image</p>
-              </div>
-            )}
-          </label>
-
-          {/* AI INFO */}
-          {generating && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-zinc-400">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              AI processing...
-            </div>
-          )}
-
-          {/* FORM */}
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium dark:text-zinc-200">
-                  Product Name
-                </label>
-
-                <Input
-                  value={name}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement>
-                  ) =>
-                    setName(e.target.value)
-                  }
-                  placeholder="Oversized Hoodie"
-                  className="
-                    dark:border-white/10
-                    dark:bg-zinc-950
-                    dark:text-white
-                    dark:placeholder:text-zinc-500
-                  "
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium dark:text-zinc-200">
-                  Category
-                </label>
-
-                <Input
-                  value={category}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement>
-                  ) =>
-                    setCategory(e.target.value)
-                  }
-                  placeholder="Hoodie"
-                  className="
-                    dark:border-white/10
-                    dark:bg-zinc-950
-                    dark:text-white
-                    dark:placeholder:text-zinc-500
-                  "
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium dark:text-zinc-200">
-                  Color
-                </label>
-
-                <Input
-                  value={color}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement>
-                  ) =>
-                    setColor(e.target.value)
-                  }
-                  placeholder="Black"
-                  className="
-                    dark:border-white/10
-                    dark:bg-zinc-950
-                    dark:text-white
-                    dark:placeholder:text-zinc-500
-                  "
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium dark:text-zinc-200">
-                  Material
-                </label>
-
-                <Input
-                  value={material}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement>
-                  ) =>
-                    setMaterial(e.target.value)
-                  }
-                  placeholder="Cotton Fleece"
-                  className="
-                    dark:border-white/10
-                    dark:bg-zinc-950
-                    dark:text-white
-                    dark:placeholder:text-zinc-500
-                  "
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium dark:text-zinc-200">
-                  Stock
-                </label>
-
-                <Input
-                  type="number"
-                  value={stock}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement>
-                  ) =>
-                    setStock(e.target.value)
-                  }
-                  placeholder="100"
-                  className="
-                    dark:border-white/10
-                    dark:bg-zinc-950
-                    dark:text-white
-                    dark:placeholder:text-zinc-500
-                  "
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium dark:text-zinc-200">
-                  Price
-                </label>
-
-                <Input
-                  type="number"
-                  value={price}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement>
-                  ) =>
-                    setPrice(e.target.value)
-                  }
-                  placeholder="250000"
-                  className="
-                    dark:border-white/10
-                    dark:bg-zinc-950
-                    dark:text-white
-                    dark:placeholder:text-zinc-500
-                  "
-                />
-              </div>
-            </div>
-
-            {/* DESCRIPTION */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium dark:text-zinc-200">
-                Description
-              </label>
-
-              <Textarea
-                value={description}
-                onChange={(
-                  e: React.ChangeEvent<HTMLTextAreaElement>
-                ) =>
-                  setDescription(e.target.value)
-                }
-                placeholder="Premium streetwear hoodie..."
-                className="
-                  min-h-[140px]
-
-                  dark:border-white/10
-                  dark:bg-zinc-950
-                  dark:text-white
-                  dark:placeholder:text-zinc-500
-                "
-              />
-            </div>
-
-            {/* AI BUTTON */}
-            <Button
-              type="button"
-              onClick={handleGenerateAI}
-              disabled={generating}
-              variant="outline"
-              className="
-                w-full
-
-                dark:border-white/10
-                dark:bg-zinc-900
-                dark:text-white
-                dark:hover:bg-zinc-800
-              "
-            >
-              {generating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generate Description
-                </>
-              )}
-            </Button>
-
-            {/* SUBMIT */}
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={saving || generating}
-                className="
-                  h-12 px-8
-
-                  dark:bg-white
-                  dark:text-black
-                  dark:hover:bg-zinc-200
-                "
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Product
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-
-    {/* SUCCESS */}
-    {success && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
         <div
           className="
-            w-full max-w-sm rounded-3xl
-            bg-background p-8 text-center
-            shadow-2xl
+            absolute
+            left-[-140px]
+            top-[-140px]
+            h-[420px]
+            w-[420px]
+            rounded-full
+            bg-fuchsia-500/10
+            blur-3xl
+          "
+        />
 
-            dark:bg-zinc-900
-            dark:border
+        <div
+          className="
+            absolute
+            bottom-[-180px]
+            right-[-120px]
+            h-[420px]
+            w-[420px]
+            rounded-full
+            bg-cyan-500/10
+            blur-3xl
+          "
+        />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl">
+        <Card
+          className="
+            overflow-hidden
+            rounded-[40px]
+            border
+            border-slate-200/70
+            bg-white/72
+            shadow-[0_30px_120px_rgba(15,23,42,0.10)]
+            backdrop-blur-3xl
+
             dark:border-white/10
+            dark:bg-[#020617]/72
+            dark:shadow-[0_30px_120px_rgba(0,0,0,0.55)]
           "
         >
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/20">
-            <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
-          </div>
+          {/* HEADER */}
+          <CardHeader
+            className="
+              border-b
+              border-slate-200/70
+              px-8
+              py-7
 
-          <h3 className="text-xl font-bold dark:text-white">
-            Product Saved
-          </h3>
+              dark:border-white/10
+            "
+          >
+            <div
+              className="
+                flex
+                flex-col
+                gap-5
+                lg:flex-row
+                lg:items-center
+                lg:justify-between
+              "
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="
+                    flex
+                    h-14
+                    w-14
+                    items-center
+                    justify-center
+                    rounded-[24px]
+                    bg-black
+                    text-white
+                    shadow-xl
 
-          <p className="mt-2 text-sm text-muted-foreground dark:text-zinc-400">
-            Product successfully created
-          </p>
-        </div>
+                    dark:bg-white
+                    dark:text-black
+                  "
+                >
+                  <Sparkles className="h-6 w-6" />
+                </div>
+
+                <div>
+                  <CardTitle
+                    className="
+                      text-3xl
+                      font-black
+                      tracking-tight
+                      text-zinc-900
+
+                      dark:text-white
+                    "
+                  >
+                    Create Product
+                  </CardTitle>
+
+                  <p
+                    className="
+                      mt-1
+                      text-sm
+                      text-zinc-500
+
+                      dark:text-zinc-400
+                    "
+                  >
+                    AI assisted premium catalog management
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className="
+                  flex
+                  flex-wrap
+                  items-center
+                  gap-3
+                "
+              >
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white/80
+                    px-4
+                    py-2
+                    text-sm
+                    text-zinc-700
+                    backdrop-blur-xl
+
+                    dark:border-white/10
+                    dark:bg-white/[0.04]
+                    dark:text-zinc-300
+                  "
+                >
+                  <Package2 className="h-4 w-4" />
+                  Smart Inventory
+                </div>
+
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white/80
+                    px-4
+                    py-2
+                    text-sm
+                    text-zinc-700
+                    backdrop-blur-xl
+
+                    dark:border-white/10
+                    dark:bg-white/[0.04]
+                    dark:text-zinc-300
+                  "
+                >
+                  <Wand2 className="h-4 w-4" />
+                  AI Generated
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-8">
+            {/* ERROR */}
+            {error && (
+              <div
+                className="
+                  mb-8
+                  flex
+                  items-center
+                  gap-3
+                  rounded-[28px]
+                  border
+                  border-red-500/20
+                  bg-red-500/10
+                  p-4
+                  text-sm
+                  text-red-500
+                "
+              >
+                <AlertCircle className="h-5 w-5 shrink-0" />
+
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div
+              className="
+                grid
+                gap-8
+                xl:grid-cols-[520px_1fr]
+              "
+            >
+              {/* LEFT */}
+              <div className="space-y-6">
+                {/* IMAGE */}
+                <label
+                  className="
+                    group
+                    block
+                    cursor-pointer
+                    overflow-hidden
+                    rounded-[36px]
+                    border
+                    border-dashed
+                    border-zinc-300
+                    bg-zinc-50
+                    transition-all
+                    duration-300
+                    hover:border-black
+
+                    dark:border-white/10
+                    dark:bg-white/[0.03]
+                    dark:hover:border-white/30
+                  "
+                >
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleFile}
+                  />
+
+                  {preview ? (
+                    <div className="relative">
+                      <Image
+                        src={preview}
+                        alt="preview"
+                        width={1600}
+                        height={900}
+                        className="
+                          h-[500px]
+                          w-full
+                          object-cover
+                        "
+                      />
+
+                      <div
+                        className="
+                          absolute
+                          inset-0
+                          bg-gradient-to-t
+                          from-black/50
+                          via-black/10
+                          to-transparent
+                        "
+                      />
+
+                      <div
+                        className="
+                          absolute
+                          bottom-5
+                          left-5
+                          rounded-2xl
+                          border
+                          border-white/10
+                          bg-black/40
+                          px-4
+                          py-2
+                          text-sm
+                          font-medium
+                          text-white
+                          backdrop-blur-xl
+                        "
+                      >
+                        AI Ready Image
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="
+                        flex
+                        h-[500px]
+                        flex-col
+                        items-center
+                        justify-center
+                        gap-5
+                        px-10
+                        text-center
+                      "
+                    >
+                      <div
+                        className="
+                          flex
+                          h-24
+                          w-24
+                          items-center
+                          justify-center
+                          rounded-[32px]
+                          bg-black
+                          text-white
+                          shadow-2xl
+
+                          dark:bg-white
+                          dark:text-black
+                        "
+                      >
+                        <Upload className="h-10 w-10" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <h3
+                          className="
+                            text-2xl
+                            font-black
+                            text-zinc-900
+
+                            dark:text-white
+                          "
+                        >
+                          Upload Product Image
+                        </h3>
+
+                        <p
+                          className="
+                            mx-auto
+                            max-w-sm
+                            text-sm
+                            leading-relaxed
+                            text-zinc-500
+
+                            dark:text-zinc-400
+                          "
+                        >
+                          AI automatically detects category,
+                          color, material, and generates
+                          product descriptions.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </label>
+
+                {/* AI STATUS */}
+                {generating && (
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-3
+                      rounded-[28px]
+                      border
+                      border-slate-200/70
+                      bg-white/80
+                      px-5
+                      py-4
+                      backdrop-blur-xl
+
+                      dark:border-white/10
+                      dark:bg-white/[0.03]
+                    "
+                  >
+                    <Loader2 className="h-5 w-5 animate-spin" />
+
+                    <div>
+                      <p
+                        className="
+                          text-sm
+                          font-semibold
+                          text-zinc-900
+
+                          dark:text-white
+                        "
+                      >
+                        AI Processing Product
+                      </p>
+
+                      <p
+                        className="
+                          mt-1
+                          text-xs
+                          text-zinc-500
+
+                          dark:text-zinc-400
+                        "
+                      >
+                        Analyzing fashion attributes...
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* RIGHT */}
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-8"
+              >
+                {/* GRID */}
+                <div className="grid gap-5 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        text-sm
+                        font-semibold
+                        text-zinc-700
+
+                        dark:text-zinc-300
+                      "
+                    >
+                      <Shirt className="h-4 w-4" />
+                      Product Name
+                    </label>
+
+                    <Input
+                      value={name}
+                      onChange={(e) =>
+                        setName(
+                          e.target.value
+                        )
+                      }
+                      placeholder="Oversized Hoodie"
+                      className="
+                        h-14
+                        rounded-2xl
+                        border-slate-200/70
+                        bg-white/80
+
+                        dark:border-white/10
+                        dark:bg-white/[0.03]
+                      "
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        text-sm
+                        font-semibold
+                        text-zinc-700
+
+                        dark:text-zinc-300
+                      "
+                    >
+                      <Boxes className="h-4 w-4" />
+                      Category
+                    </label>
+
+                    <Input
+                      value={category}
+                      onChange={(e) =>
+                        setCategory(
+                          e.target.value
+                        )
+                      }
+                      placeholder="Streetwear"
+                      className="
+                        h-14
+                        rounded-2xl
+                        border-slate-200/70
+                        bg-white/80
+
+                        dark:border-white/10
+                        dark:bg-white/[0.03]
+                      "
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        text-sm
+                        font-semibold
+                        text-zinc-700
+
+                        dark:text-zinc-300
+                      "
+                    >
+                      <Palette className="h-4 w-4" />
+                      Color
+                    </label>
+
+                    <Input
+                      value={color}
+                      onChange={(e) =>
+                        setColor(
+                          e.target.value
+                        )
+                      }
+                      placeholder="Black"
+                      className="
+                        h-14
+                        rounded-2xl
+                        border-slate-200/70
+                        bg-white/80
+
+                        dark:border-white/10
+                        dark:bg-white/[0.03]
+                      "
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      className="
+                        text-sm
+                        font-semibold
+                        text-zinc-700
+
+                        dark:text-zinc-300
+                      "
+                    >
+                      Material
+                    </label>
+
+                    <Input
+                      value={material}
+                      onChange={(e) =>
+                        setMaterial(
+                          e.target.value
+                        )
+                      }
+                      placeholder="Cotton Fleece"
+                      className="
+                        h-14
+                        rounded-2xl
+                        border-slate-200/70
+                        bg-white/80
+
+                        dark:border-white/10
+                        dark:bg-white/[0.03]
+                      "
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      className="
+                        text-sm
+                        font-semibold
+                        text-zinc-700
+
+                        dark:text-zinc-300
+                      "
+                    >
+                      Stock
+                    </label>
+
+                    <Input
+                      type="number"
+                      value={stock}
+                      onChange={(e) =>
+                        setStock(
+                          e.target.value
+                        )
+                      }
+                      placeholder="100"
+                      className="
+                        h-14
+                        rounded-2xl
+                        border-slate-200/70
+                        bg-white/80
+
+                        dark:border-white/10
+                        dark:bg-white/[0.03]
+                      "
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      className="
+                        text-sm
+                        font-semibold
+                        text-zinc-700
+
+                        dark:text-zinc-300
+                      "
+                    >
+                      Price
+                    </label>
+
+                    <Input
+                      type="number"
+                      value={price}
+                      onChange={(e) =>
+                        setPrice(
+                          e.target.value
+                        )
+                      }
+                      placeholder="250000"
+                      className="
+                        h-14
+                        rounded-2xl
+                        border-slate-200/70
+                        bg-white/80
+
+                        dark:border-white/10
+                        dark:bg-white/[0.03]
+                      "
+                    />
+                  </div>
+                </div>
+
+                {/* DESCRIPTION */}
+                <div className="space-y-3">
+                  <div
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                    "
+                  >
+                    <label
+                      className="
+                        text-sm
+                        font-semibold
+                        text-zinc-700
+
+                        dark:text-zinc-300
+                      "
+                    >
+                      Description
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={
+                        handleGenerateAI
+                      }
+                      disabled={generating}
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        rounded-2xl
+                        border
+                        border-slate-200
+                        bg-white/80
+                        px-4
+                        py-2
+                        text-xs
+                        font-semibold
+                        text-zinc-700
+                        transition-all
+                        hover:scale-[1.02]
+
+                        dark:border-white/10
+                        dark:bg-white/[0.03]
+                        dark:text-zinc-300
+                      "
+                    >
+                      {generating ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          Generating
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="h-3.5 w-3.5" />
+                          AI Generate
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <Textarea
+                    value={description}
+                    onChange={(e) =>
+                      setDescription(
+                        e.target.value
+                      )
+                    }
+                    placeholder="Premium streetwear hoodie..."
+                    className="
+                      min-h-[220px]
+                      rounded-[28px]
+                      border-slate-200/70
+                      bg-white/80
+                      p-5
+
+                      dark:border-white/10
+                      dark:bg-white/[0.03]
+                    "
+                  />
+                </div>
+
+                {/* ACTION */}
+                <div
+                  className="
+                    flex
+                    flex-col
+                    gap-4
+                    pt-2
+                    sm:flex-row
+                    sm:justify-end
+                  "
+                >
+                  <Button
+                    type="submit"
+                    disabled={
+                      saving ||
+                      generating
+                    }
+                    className="
+                      h-14
+                      rounded-2xl
+                      px-8
+                      text-sm
+                      font-bold
+                    "
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+
+                        Saving Product...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+
+                        Save Product
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    )}
-  </main>
-)}
+
+      {/* SUCCESS */}
+      {success && (
+        <div
+          className="
+            fixed
+            inset-0
+            z-50
+            flex
+            items-center
+            justify-center
+            bg-black/50
+            p-4
+            backdrop-blur-md
+          "
+        >
+          <div
+            className="
+              w-full
+              max-w-sm
+              rounded-[36px]
+              border
+              border-white/10
+              bg-white/92
+              p-8
+              text-center
+              shadow-2xl
+              backdrop-blur-3xl
+
+              dark:bg-[#020617]/92
+            "
+          >
+            <div
+              className="
+                mx-auto
+                mb-5
+                flex
+                h-20
+                w-20
+                items-center
+                justify-center
+                rounded-full
+                bg-green-500/10
+              "
+            >
+              <CheckCircle2
+                className="
+                  h-10
+                  w-10
+                  text-green-500
+                "
+              />
+            </div>
+
+            <h3
+              className="
+                text-2xl
+                font-black
+                text-zinc-900
+
+                dark:text-white
+              "
+            >
+              Product Saved
+            </h3>
+
+            <p
+              className="
+                mt-2
+                text-sm
+                text-zinc-500
+
+                dark:text-zinc-400
+              "
+            >
+              Product successfully created
+            </p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}

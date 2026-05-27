@@ -1,6 +1,18 @@
-import { getStats } from "@/lib/services/stats.service";
+import { NextResponse } from "next/server";
+
+import { getStats } from "@/server/queries/stats/getStats";
+
+import { handleApiError } from "@/lib/errors/ApiError";
 
 export async function GET() {
-  const data = await getStats();
-  return Response.json(data);
+  try {
+    const stats = await getStats();
+
+    return NextResponse.json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

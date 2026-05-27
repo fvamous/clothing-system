@@ -1,0 +1,18 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
+
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "Identifier[name='document']",
+        "message": "Gunakan next-themes atau useSafeTheme. Jangan akses document langsung."
+      }
+    ]
+  }
+}

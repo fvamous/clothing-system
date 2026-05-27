@@ -1,35 +1,38 @@
-"use client";
+import type { Product } from "@prisma/client";
 
-import ProductCard from "@/components/admin/modules/products/ProductCard";
-import { Product } from "@/types/product";
+import ProductCard from "./ProductCard";
 
-type Props = {
-  products?: Product[];
+type ProductGridProps = {
+  products: Product[];
 };
 
-export default function ProductGrid({ products }: Props) {
-  if (!products || products.length === 0) {
+export default function ProductGrid({
+  products,
+}: ProductGridProps) {
+  if (!products.length) {
     return (
       <div
-        style={{
-          padding: 20,
-          textAlign: "center",
-          color: "#666",
-        }}
+        className="
+          py-24
+          text-center
+          text-zinc-500
+        "
       >
-        No products available
+        Produk belum tersedia
       </div>
     );
   }
 
   return (
     <div
-      style={{
-        display: "grid",
-        gridTemplateColumns:
-          "repeat(auto-fill, minmax(220px, 1fr))",
-        gap: 16,
-      }}
+      className="
+        grid
+        grid-cols-1
+        gap-6
+        sm:grid-cols-2
+        lg:grid-cols-3
+        xl:grid-cols-4
+      "
     >
       {products.map((product) => (
         <ProductCard

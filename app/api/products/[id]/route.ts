@@ -1,106 +1,65 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/infra/prisma/client";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/infra/auth/authOptions";
+import { NextRequest, NextResponse } from "next/server";
 
-// =========================
-// AUTH
-// =========================
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
+import { productService } from "@/lib/domain/products/service";
 
-  if (!session?.user) {
-    return { ok: false as const, status: 401, error: "Unauthorized" };
-  }
+import { handleApiError } from "@/lib/errors/ApiError";
 
-  if (session.user.role !== "ADMIN") {
-    return { ok: false as const, status: 403, error: "Forbidden" };
-  }
-
-  return { ok: true as const };
+interface Params {
+  params: {
+    id: string;
+  };
 }
 
-// =========================
-// GET
-// =========================
 export async function GET(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: Params
 ) {
-  const { id } = await context.params;
+  try {
+    const product =
+      await productService.getById(params.id);
 
-  const productId = id; // ✅ UUID (NO Number)
-
-  const product = await prisma.product.findFirst({
-    where: {
-      id: productId,
-      isDeleted: false,
-    },
-  });
-
-  return NextResponse.json(product);
-}
-
-// =========================
-// UPDATE
-// =========================
-export async function PUT(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
-) {
-  const guard = await requireAdmin();
-
-  if (!guard.ok) {
-    return NextResponse.json(
-      { error: guard.error },
-      { status: guard.status }
-    );
+    return NextResponse.json({
+      success: true,
+      data: product,
+    });
+  } catch (error) {
+    return handleApiError(error);
   }
-
-  const { id } = await context.params;
-  const productId = id; // ✅ UUID
-
-  const body = await req.json();
-
-  const updated = await prisma.product.update({
-    where: { id: productId },
-    data: {
-      name: body.name,
-      price: Number(body.price), // tetap aman
-      stock: Number(body.stock ?? 0),
-      imageUrl: body.imageUrl ?? null,
-      description: body.description ?? null,
-    },
-  });
-
-  return NextResponse.json(updated);
 }
 
-// =========================
-// DELETE (SOFT DELETE ONLY)
-// =========================
+export async function PATCH(
+  request: NextRequest,
+  { params }: Params
+) {
+  try {
+    const body = await request.json();
+
+    const updated =
+      await productService.update(
+        params.id,
+        body
+      );
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
 export async function DELETE(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: Params
 ) {
-  const guard = await requireAdmin();
+  try {
+    await productService.delete(params.id);
 
-  if (!guard.ok) {
-    return NextResponse.json(
-      { error: guard.error },
-      { status: guard.status }
-    );
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (error) {
+    return handleApiError(error);
   }
-
-  const { id } = await context.params;
-  const productId = id; // ✅ UUID
-
-  await prisma.product.update({
-    where: { id: productId },
-    data: {
-      isDeleted: true,
-    },
-  });
-
-  return NextResponse.json({ success: true });
 }

@@ -1,11 +1,25 @@
+import { NextResponse } from "next/server";
+
 import { prisma } from "@/lib/infra/prisma/client";
 
-export async function GET() {
-  const count = await prisma.order.count({
-    where: {
-      status: "PENDING",
-    },
-  });
+import { handleApiError } from "@/lib/errors/ApiError";
 
-  return Response.json({ count });
+export async function GET() {
+  try {
+    const count =
+      await prisma.order.count({
+        where: {
+          status: "PENDING",
+        },
+      });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        unread: count,
+      },
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }
