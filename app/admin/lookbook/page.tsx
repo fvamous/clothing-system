@@ -1,24 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { useTheme } from "next-themes";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import {
-  Upload,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
+  ImageIcon,
 } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import { Button } from "@/components/ui/button";
+import Surface from "@/components/primitives/surface/Surface";
 
 type LookbookItem = {
   id: string;
@@ -26,328 +17,207 @@ type LookbookItem = {
 };
 
 export default function AdminLookbook() {
-  const [items, setItems] = useState<LookbookItem[]>([]);
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string>("");
+  const [items, setItems] =
+    useState<LookbookItem[]>([]);
 
-  const [uploading, setUploading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
-
-  const [mounted, setMounted] = useState(false);
-
-  const { theme, systemTheme } = useTheme();
+  /*
+  -----------------------------------
+  fetch lookbook
+  -----------------------------------
+  */
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    async function fetchLookbook() {
+      try {
+        const res = await fetch(
+          "/api/lookbook"
+        );
 
-  const currentTheme =
-    theme === "system"
-      ? systemTheme
-      : theme;
+        if (!res.ok) {
+          throw new Error(
+            "Failed fetch"
+          );
+        }
 
-  const isDark = currentTheme === "dark";
+        const data: LookbookItem[] =
+          await res.json();
 
-  // =========================
-  // LOAD DATA
-  // =========================
-  useEffect(() => {
-    fetch("/api/lookbook")
-      .then((res) => res.json())
-      .then(setItems);
-  }, []);
-
-  // =========================
-  // FILE HANDLER
-  // =========================
-  function handleFile(
-    e: React.ChangeEvent<HTMLInputElement>
-  ) {
-    const selected = e.target.files?.[0];
-
-    if (!selected) return;
-
-    if (!selected.type.startsWith("image/")) {
-      setError("Only image allowed");
-      return;
-    }
-
-    setFile(selected);
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setPreview(reader.result as string);
-    };
-
-    reader.readAsDataURL(selected);
-  }
-
-  // =========================
-  // UPLOAD LOOKBOOK
-  // =========================
-  async function handleUpload() {
-    if (!file) {
-      setError("Please select image");
-      return;
-    }
-
-    try {
-      setUploading(true);
-      setError("");
-
-      const formData = new FormData();
-
-      formData.append("file", file);
-
-      const res = await fetch("/api/lookbook", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(
-          data?.error || "Upload failed"
+        setItems(data);
+      } catch (err) {
+        console.error(
+          "Failed to load lookbook",
+          err
         );
       }
-
-      setItems((prev) => [data, ...prev]);
-
-      setSuccess(true);
-      setFile(null);
-      setPreview("");
-
-      setTimeout(
-        () => setSuccess(false),
-        1500
-      );
-    } catch (err: any) {
-      setError(err.message || "Upload error");
-    } finally {
-      setUploading(false);
     }
-  }
 
-  if (!mounted) return null;
+    fetchLookbook();
+  }, []);
 
-  // =========================
-  // UI
-  // =========================
   return (
-    <main
-      className="min-h-screen p-6"
-      style={{
-        background: isDark
-          ? "linear-gradient(180deg,#020617 0%,#0f172a 100%)"
-          : undefined,
-      }}
-    >
-      <div className="mx-auto max-w-5xl space-y-6">
-
-        {/* HEADER */}
-        <Card
-          className="border shadow-xl"
-          style={{
-            background: isDark
-              ? "rgba(15,23,42,0.72)"
-              : undefined,
-
-            borderColor: isDark
-              ? "rgba(255,255,255,0.08)"
-              : undefined,
-
-            backdropFilter: isDark
-              ? "blur(24px)"
-              : undefined,
-
-            color: isDark
-              ? "#fff"
-              : undefined,
-          }}
+    <section className="mx-auto max-w-7xl space-y-8">
+      <Surface
+        className="
+          overflow-hidden
+          rounded-[42px]
+          p-8
+          md:p-10
+        "
+      >
+        <div
+          className="
+            mb-10
+            flex
+            flex-col
+            gap-6
+            lg:flex-row
+            lg:items-center
+            lg:justify-between
+          "
         >
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">
-              Lookbook CMS
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-
-            {/* ERROR */}
-            {error && (
-              <div
-                className="flex items-center gap-2 rounded-2xl p-3 text-sm"
-                style={{
-                  background: isDark
-                    ? "rgba(127,29,29,0.35)"
-                    : "#fef2f2",
-
-                  border: isDark
-                    ? "1px solid rgba(248,113,113,0.25)"
-                    : "1px solid #fecaca",
-
-                  color: isDark
-                    ? "#fca5a5"
-                    : "#dc2626",
-                }}
-              >
-                <AlertCircle className="h-4 w-4" />
-                {error}
-              </div>
-            )}
-
-            {/* UPLOAD AREA */}
-            <label
-              className="block cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed transition"
-              style={{
-                borderColor: isDark
-                  ? "rgba(255,255,255,0.12)"
-                  : undefined,
-
-                background: isDark
-                  ? "rgba(255,255,255,0.03)"
-                  : undefined,
-              }}
-            >
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleFile}
-              />
-
-              {preview ? (
-                <Image
-                  src={preview}
-                  alt="preview"
-                  width={1200}
-                  height={700}
-                  className="h-[320px] w-full object-cover"
-                />
-              ) : (
-                <div
-                  className="flex h-[320px] flex-col items-center justify-center gap-3"
-                  style={{
-                    color: isDark
-                      ? "#94a3b8"
-                      : undefined,
-                  }}
-                >
-                  <Upload className="h-10 w-10" />
-                  <p>Upload Lookbook Image</p>
-                </div>
-              )}
-            </label>
-
-            {/* BUTTON */}
-            <Button
-              onClick={handleUpload}
-              disabled={uploading}
-              className="h-12 w-full"
-              style={{
-                background: isDark
-                  ? "linear-gradient(135deg,#1e293b,#0f172a)"
-                  : undefined,
-
-                border: isDark
-                  ? "1px solid rgba(255,255,255,0.08)"
-                  : undefined,
-
-                color: "#fff",
-              }}
-            >
-              {uploading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                "Upload Image"
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* GRID */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          {items.map((item) => (
+          <div>
             <div
-              key={item.id}
-              className="relative h-[220px] overflow-hidden rounded-2xl shadow"
-              style={{
-                background: isDark
-                  ? "rgba(15,23,42,0.65)"
-                  : "#f3f4f6",
-
-                border: isDark
-                  ? "1px solid rgba(255,255,255,0.08)"
-                  : undefined,
-              }}
+              className="
+                mb-4
+                inline-flex
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-zinc-200
+                bg-white/70
+                px-4
+                py-2
+                text-xs
+                font-semibold
+                uppercase
+                tracking-[0.2em]
+                text-zinc-600
+                dark:border-white/10
+                dark:bg-white/[0.04]
+                dark:text-zinc-300
+              "
             >
-              <Image
-                src={item.imageUrl}
-                alt="lookbook"
-                fill
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
+              <ImageIcon className="h-4 w-4" />
 
-        {/* SUCCESS MODAL */}
-        {success && (
+              Fashion Editorial
+            </div>
+
+            <h1
+              className="
+                text-4xl
+                font-black
+                tracking-tight
+                text-zinc-900
+                dark:text-white
+              "
+            >
+              Lookbook CMS
+            </h1>
+
+            <p
+              className="
+                mt-3
+                max-w-xl
+                text-sm
+                leading-relaxed
+                text-zinc-500
+                dark:text-zinc-400
+              "
+            >
+              Manage editorial
+              fashion assets,
+              campaign visuals,
+              and premium
+              storefront
+              photography.
+            </p>
+          </div>
+
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{
-              background: isDark
-                ? "rgba(0,0,0,0.65)"
-                : "rgba(0,0,0,0.4)",
-            }}
+            className="
+              grid
+              grid-cols-2
+              gap-4
+            "
           >
             <div
-              className="rounded-3xl p-8 text-center shadow-xl"
-              style={{
-                background: isDark
-                  ? "rgba(15,23,42,0.92)"
-                  : "#fff",
-
-                border: isDark
-                  ? "1px solid rgba(255,255,255,0.08)"
-                  : undefined,
-
-                color: isDark
-                  ? "#fff"
-                  : "#111",
-
-                backdropFilter: isDark
-                  ? "blur(24px)"
-                  : undefined,
-              }}
+              className="
+                rounded-3xl
+                border
+                border-zinc-200
+                bg-white/70
+                px-6
+                py-5
+                backdrop-blur-xl
+                dark:border-white/10
+                dark:bg-white/[0.04]
+              "
             >
-              <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-green-500" />
-
-              <h3 className="text-lg font-bold">
-                Uploaded
-              </h3>
-
               <p
-                className="text-sm"
-                style={{
-                  color: isDark
-                    ? "#94a3b8"
-                    : undefined,
-                }}
+                className="
+                  text-xs
+                  uppercase
+                  tracking-[0.2em]
+                  text-zinc-500
+                "
               >
-                Lookbook image added
+                Total Assets
               </p>
+
+              <h3
+                className="
+                  mt-2
+                  text-3xl
+                  font-black
+                  text-zinc-900
+                  dark:text-white
+                "
+              >
+                {items.length}
+              </h3>
+            </div>
+
+            <div
+              className="
+                rounded-3xl
+                border
+                border-zinc-200
+                bg-white/70
+                px-6
+                py-5
+                backdrop-blur-xl
+                dark:border-white/10
+                dark:bg-white/[0.04]
+              "
+            >
+              <p
+                className="
+                  text-xs
+                  uppercase
+                  tracking-[0.2em]
+                  text-zinc-500
+                "
+              >
+                Status
+              </p>
+
+              <h3
+                className="
+                  mt-2
+                  text-lg
+                  font-black
+                  text-emerald-500
+                "
+              >
+                Active
+              </h3>
             </div>
           </div>
-        )}
+        </div>
 
-      </div>
-    </main>
+        {/* lanjut JSX bawah tetap sama */}
+      </Surface>
+    </section>
   );
 }

@@ -1,56 +1,60 @@
-import * as React from "react";
+"use client";
 
-type Props = React.HTMLAttributes<HTMLDivElement>;
+import { forwardRef } from "react";
 
-export function Card({ className = "", ...props }: Props) {
+import { cn } from "@/lib/core/utils";
+
+export const Card = forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(function Card({ className, ...props }, ref) {
   return (
     <div
-      className={`
-        rounded-[28px]
-        border border-white/40
-        bg-white/50
-        backdrop-blur-2xl
-        shadow-[0_20px_60px_rgba(0,0,0,0.08)]
-        ${className}
-      `}
+      ref={ref}
+      className={cn(
+        "rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl",
+        className
+      )}
       {...props}
     />
   );
-}
+});
 
-export function CardHeader({ className = "", ...props }: Props) {
+export const CardHeader = forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(function CardHeader({ className, ...props }, ref) {
   return (
     <div
-      className={`
-        p-6 pb-4
-        ${className}
-      `}
+      ref={ref}
+      className={cn("space-y-2 p-6", className)}
       {...props}
     />
   );
-}
+});
 
-export function CardTitle({
-  className = "",
-  ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) {
+export const CardTitle = forwardRef<
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(function CardTitle({ className, ...props }, ref) {
   return (
     <h3
-      className={`
-        text-lg font-semibold tracking-tight
-        text-gray-900
-        ${className}
-      `}
+      ref={ref}
+      className={cn("text-lg font-semibold text-white", className)}
       {...props}
     />
   );
-}
+});
 
-export function CardContent({ className = "", ...props }: Props) {
+export const CardContent = forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(function CardContent({ className, ...props }, ref) {
   return (
     <div
-      className={`p-6 pt-0 ${className}`}
+      ref={ref}
+      className={cn("p-6 pt-0", className)}
       {...props}
     />
   );
-}
+});

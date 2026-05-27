@@ -1,26 +1,23 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { orderWorkflow } from "@/lib/domain/orders/workflow";
-import { OrderStatus } from "@prisma/client";
+import { useState } from "react";
 
 type Props = {
   orderId: string;
-  status: OrderStatus;
+  status: string;
 };
 
 export default function OrderStatusButtons({
   orderId,
   status,
 }: Props) {
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  // ambil allowed next status dari workflow
-  const allowedNext = orderWorkflow.getAllowedNext(status);
-
-  const updateStatus = async (newStatus: OrderStatus) => {
+  async function updateStatus(newStatus: string) {
     try {
-      const res = await fetch(`/api/orders/${orderId}/status`, {
+      setLoading(true);
+
+      const res = await fetch(`/api/orders/${orderId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -29,42 +26,44 @@ export default function OrderStatusButtons({
       });
 
       if (!res.ok) {
-        throw new Error("Failed update status");
+        throw new Error("Failed to update status");
       }
 
-      router.refresh();
+      // optional: refresh page biar data update
+      window.location.reload();
     } catch (err) {
-      console.error("Update status error:", err);
+      console.error(err);
+      alert("Failed to update order status");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const renderButton = (target: OrderStatus, label: string, color?: string) => {
-    if (!allowedNext.includes(target)) return null;
-
-    return (
-      <button
-        onClick={() => updateStatus(target)}
-        style={{
-          padding: "6px 10px",
-          borderRadius: 6,
-          border: "none",
-          cursor: "pointer",
-          background: color || "#111",
-          color: "#fff",
-        }}
-      >
-        {label}
-      </button>
-    );
-  };
+  }
 
   return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-      {renderButton("PAID", "Mark Paid", "#16a34a")}
-      {renderButton("PROCESSING", "Processing", "#2563eb")}
-      {renderButton("SHIPPED", "Ship", "#7c3aed")}
-      {renderButton("COMPLETED", "Complete", "#0f172a")}
-      {renderButton("CANCELLED", "Cancel", "#dc2626")}
+    <div className="flex gap-2">
+      <button
+        disabled={loading || status === "PAID"}
+        onClick={() => updateStatus("PAID")}
+        className="rounded-xl bg-emerald-500 px-3 py-1 text-xs font-bold text-white"
+      >
+        Paid
+      </button>
+
+      <button
+        disabled={loading || status === "SHIPPED"}
+        onClick={() => updateStatus("SHIPPED")}
+        className="rounded-xl bg-amber-500 px-3 py-1 text-xs font-bold text-white"
+      >
+        Shipped
+      </button>
+
+      <button
+        disabled={loading || status === "COMPLETED"}
+        onClick={() => updateStatus("COMPLETED")}
+        className="rounded-xl bg-blue-500 px-3 py-1 text-xs font-bold text-white"
+      >
+        Done
+      </button>
     </div>
   );
 }

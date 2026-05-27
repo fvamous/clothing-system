@@ -1,24 +1,38 @@
-import { productRepository } from "./repository";
 import { Prisma } from "@prisma/client";
 
+import { productRepository } from "./repository";
+
+import { NotFoundError } from "@/lib/errors/NotFoundError";
+
 export const productService = {
-  getAll: () => {
+  async getAll() {
     return productRepository.findAll();
   },
 
-  getById: (id: string) => {
-    return productRepository.findById(id);
+  async getById(id: string) {
+    const product =
+      await productRepository.findById(id);
+
+    if (!product) {
+      throw new NotFoundError("Product not found");
+    }
+
+    return product;
   },
 
-  create: (data: Prisma.ProductCreateInput) => {
+  async create(data: Prisma.ProductCreateInput) {
     return productRepository.create(data);
   },
 
-  update: (id: string, data: Prisma.ProductUpdateInput) => {
+  async update(id: string, data: Prisma.ProductUpdateInput) {
+    await this.getById(id);
+
     return productRepository.update(id, data);
   },
 
-  remove: (id: string) => {
-    return productRepository.delete(id);
+  async delete(id: string) {
+    await this.getById(id);
+
+    return productRepository.remove(id);
   },
 };

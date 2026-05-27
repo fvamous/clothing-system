@@ -1,34 +1,33 @@
 "use client";
 
-import { ReactNode } from "react";
-import { useThemeTokens } from "@/lib/ui/useThemeTokens";
+import { cn } from "@/lib/core/utils";
 
-export function Text({
-  children,
-  muted,
-  size = "md",
-}: {
-  children: ReactNode;
+type TextProps = React.HTMLAttributes<HTMLParagraphElement> & {
   muted?: boolean;
   size?: "sm" | "md" | "lg";
-}) {
-  const { c } = useThemeTokens();
+};
 
-  const sizes = {
-    sm: 12,
-    md: 14,
-    lg: 18,
-  };
+const sizes = {
+  sm: "text-sm",
+  md: "text-base",
+  lg: "text-3xl font-semibold",
+};
 
+export function Text({
+  className,
+  muted = false,
+  size = "md",
+  ...props
+}: TextProps) {
   return (
     <p
-      style={{
-        fontSize: sizes[size],
-        color: muted ? c.muted : c.text,
-        lineHeight: 1.6,
-      }}
-    >
-      {children}
-    </p>
+      className={cn(
+        "leading-relaxed",
+        sizes[size],
+        muted && "text-current opacity-60",
+        className
+      )}
+      {...props}
+    />
   );
 }

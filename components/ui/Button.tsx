@@ -1,55 +1,45 @@
 "use client";
 
-import * as React from "react";
+import { forwardRef } from "react";
 
-type Variant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "ghost"
-  | "danger";
+import { cn } from "@/lib/core/utils";
 
-type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: Variant;
-};
+type ButtonVariant = "default" | "outline" | "ghost" | "destructive";
 
-const variants: Record<Variant, string> = {
-  primary:
-    "bg-black text-white hover:opacity-90",
-  secondary:
-    "bg-muted text-foreground hover:bg-muted/80",
-  outline:
-    "border border-border bg-background hover:bg-muted",
-  ghost:
-    "bg-transparent hover:bg-muted text-foreground",
-  danger:
-    "bg-red-500 text-white hover:bg-red-600",
-};
-
-export function Button({
-  className = "",
-  variant = "primary",
-  ...props
-}: Props) {
-  return (
-    <button
-      className={`
-        inline-flex
-        items-center
-        justify-center
-        gap-2
-        rounded-lg
-        px-4
-        py-2
-        text-sm
-        font-medium
-        transition
-        disabled:opacity-50
-        disabled:pointer-events-none
-        ${variants[variant]}
-        ${className}
-      `}
-      {...props}
-    />
-  );
+interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
 }
+
+const variants: Record<ButtonVariant, string> = {
+  default:
+    "bg-white text-black shadow-lg shadow-black/10 hover:bg-white/90",
+  outline:
+    "border border-white/10 bg-white/5 text-white hover:bg-white/10",
+  ghost:
+    "bg-transparent text-white hover:bg-white/10",
+  destructive:
+    "bg-red-500 text-white hover:bg-red-500/90",
+};
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  function Button(
+    { className, variant = "default", type = "button", ...props },
+    ref
+  ) {
+    return (
+      <button
+        ref={ref}
+        type={type}
+        className={cn(
+          "inline-flex h-12 items-center justify-center rounded-2xl px-5 text-sm font-semibold",
+          "transition-all duration-200 hover:scale-[1.02]",
+          "disabled:pointer-events-none disabled:opacity-50",
+          variants[variant],
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
