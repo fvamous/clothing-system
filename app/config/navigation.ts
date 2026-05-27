@@ -61,7 +61,7 @@ export const customerNavigation =
 
     {
       title: "Shop",
-      href: "/products",
+      href: "/catalog",
     },
 
     {

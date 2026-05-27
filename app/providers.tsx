@@ -8,6 +8,8 @@ import ToastProvider from "@/components/providers/ToastProvider";
 
 import QueryProvider from "@/components/providers/QueryProvider";
 
+import { CartProvider } from "@/app/context/CartContext";
+
 export default function Providers({
   children,
 }: {
@@ -18,7 +20,9 @@ export default function Providers({
       <ThemeProvider>
         <QueryProvider>
           <ToastProvider>
-            {children}
+            <CartProvider>
+              {children}
+            </CartProvider>
           </ToastProvider>
         </QueryProvider>
       </ThemeProvider>

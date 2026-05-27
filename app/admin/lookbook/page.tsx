@@ -16,6 +16,12 @@ type LookbookItem = {
   imageUrl: string;
 };
 
+type LookbookResponse =
+  | LookbookItem[]
+  | {
+      data?: LookbookItem[];
+    };
+
 export default function AdminLookbook() {
   const [items, setItems] =
     useState<LookbookItem[]>([]);
@@ -39,10 +45,18 @@ export default function AdminLookbook() {
           );
         }
 
-        const data: LookbookItem[] =
+        const payload: LookbookResponse =
           await res.json();
 
-        setItems(data);
+        const data = Array.isArray(payload)
+          ? payload
+          : payload.data;
+
+        setItems(
+          Array.isArray(data)
+            ? data
+            : []
+        );
       } catch (err) {
         console.error(
           "Failed to load lookbook",

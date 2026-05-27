@@ -1,6 +1,7 @@
 export default function BrandStory() {
   return (
     <section
+      id="brand-story"
       className="
         grid
         gap-10

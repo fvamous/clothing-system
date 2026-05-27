@@ -10,6 +10,12 @@ type LookbookItem = {
   imageUrl: string;
 };
 
+type LookbookResponse =
+  | LookbookItem[]
+  | {
+      data?: LookbookItem[];
+    };
+
 export default function AboutGallery() {
   const [items, setItems] = useState<LookbookItem[]>([]);
 
@@ -23,7 +29,17 @@ export default function AboutGallery() {
 
     fetch("/api/lookbook")
       .then((res) => res.json())
-      .then(setItems)
+      .then((payload: LookbookResponse) => {
+        const nextItems = Array.isArray(payload)
+          ? payload
+          : payload.data;
+
+        setItems(
+          Array.isArray(nextItems)
+            ? nextItems
+            : []
+        );
+      })
       .catch(() => setItems([]));
   }, []);
 

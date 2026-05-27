@@ -4,8 +4,12 @@ import { orderService } from "@/lib/domain/orders/service";
 
 import { handleApiError } from "@/lib/errors/ApiError";
 
+import { requireAdminApi } from "@/lib/infra/auth/api";
+
 export async function GET() {
   try {
+    await requireAdminApi();
+
     const orders =
       await orderService.getAll();
 
@@ -22,6 +26,8 @@ export async function POST(
   request: NextRequest
 ) {
   try {
+    await requireAdminApi();
+
     const body = await request.json();
 
     const order =

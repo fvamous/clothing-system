@@ -98,7 +98,7 @@ export default function Hero() {
           </Link>
 
           <Link
-            href="/about"
+            href="#brand-story"
             className="
               rounded-2xl
               border

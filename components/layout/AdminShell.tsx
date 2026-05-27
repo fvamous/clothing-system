@@ -12,12 +12,12 @@ export default function AdminShell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-zinc-50 text-zinc-950 dark:bg-[#050507] dark:text-white">
 
       <div className="flex">
 
         {/* Sidebar */}
-        <aside className="hidden border-r border-white/10 lg:block">
+        <aside className="hidden lg:block">
           <NavigationRail />
         </aside>
 

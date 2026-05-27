@@ -4,6 +4,8 @@ import { prisma } from "@/lib/infra/prisma/client";
 
 import { handleApiError } from "@/lib/errors/ApiError";
 
+import { requireAdminApi } from "@/lib/infra/auth/api";
+
 interface Params {
   params: {
     id: string;
@@ -15,6 +17,8 @@ export async function PATCH(
   { params }: Params
 ) {
   try {
+    await requireAdminApi();
+
     const body = await request.json();
 
     const order =

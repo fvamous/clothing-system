@@ -4,6 +4,8 @@ import { productService } from "@/lib/domain/products/service";
 
 import { handleApiError } from "@/lib/errors/ApiError";
 
+import { requireAdminApi } from "@/lib/infra/auth/api";
+
 interface Params {
   params: {
     id: string;
@@ -32,6 +34,8 @@ export async function PATCH(
   { params }: Params
 ) {
   try {
+    await requireAdminApi();
+
     const body = await request.json();
 
     const updated =
@@ -54,6 +58,8 @@ export async function DELETE(
   { params }: Params
 ) {
   try {
+    await requireAdminApi();
+
     await productService.delete(params.id);
 
     return NextResponse.json({

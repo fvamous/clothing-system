@@ -24,14 +24,14 @@ type SearchItem = {
 const items: SearchItem[] = [
   {
     title: "Oversized Hoodie",
-    href: "/products/oversized-hoodie",
+    href: "/catalog",
     category: "Streetwear",
     icon: Shirt,
   },
 
   {
     title: "Cargo Pants",
-    href: "/products/cargo-pants",
+    href: "/catalog",
     category: "Fashion",
     icon: ShoppingBag,
   },
@@ -45,7 +45,7 @@ const items: SearchItem[] = [
 
   {
     title: "Vintage Washed Tee",
-    href: "/products/vintage-tee",
+    href: "/catalog",
     category: "T-Shirt",
     icon: Shirt,
   },

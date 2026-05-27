@@ -6,6 +6,8 @@ import { handleApiError } from "@/lib/errors/ApiError";
 
 import { createProductSchema } from "@/lib/validations/product";
 
+import { requireAdminApi } from "@/lib/infra/auth/api";
+
 export async function GET() {
   try {
     const products =
@@ -24,6 +26,8 @@ export async function POST(
   request: NextRequest
 ) {
   try {
+    await requireAdminApi();
+
     const body = await request.json();
 
     const validated =

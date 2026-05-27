@@ -11,6 +11,10 @@ type Stats = {
   countries: number;
 };
 
+type StatsResponse = Partial<Stats> & {
+  data?: Partial<Stats>;
+};
+
 const defaultStats: Stats = {
   customers: 0,
   products: 0,
@@ -32,7 +36,11 @@ export default function AboutStats() {
     async function fetchStats() {
       try {
         const res = await fetch("/api/stats");
-        const data = await res.json();
+        const payload: StatsResponse =
+          await res.json();
+
+        const data: Partial<Stats> =
+          payload.data ?? payload;
 
         setStats({
           customers: Number(data?.customers ?? 0),
