@@ -13,10 +13,15 @@ export default function CatalogSidebar({
       className="
         rounded-[32px]
         border
-        border-white/10
-        bg-white/5
+        border-zinc-200/70
+        bg-white/70
         p-6
+        text-zinc-950
+        shadow-sm
         backdrop-blur-xl
+        dark:border-white/10
+        dark:bg-white/5
+        dark:text-white
       "
     >
       <h3 className="mb-6 font-semibold">
@@ -36,9 +41,15 @@ export default function CatalogSidebar({
               px-4
               py-3
               text-left
+              text-zinc-600
               transition
-              hover:border-white/10
-              hover:bg-white/5
+              hover:border-zinc-200
+              hover:bg-white
+              hover:text-zinc-950
+              dark:text-zinc-300
+              dark:hover:border-white/10
+              dark:hover:bg-white/5
+              dark:hover:text-white
             "
           >
             {category.name}

@@ -57,8 +57,10 @@ export default function CartDrawer() {
               border-white/10
               bg-white/80
               p-6
+              text-zinc-950
               backdrop-blur-2xl
               dark:bg-black/80
+              dark:text-white
             "
           >
             <div className="mb-6 flex items-center justify-between">
@@ -73,7 +75,7 @@ export default function CartDrawer() {
 
             <div className="flex-1 space-y-4 overflow-auto">
               {cart.length === 0 ? (
-                <div className="py-24 text-center text-zinc-500">
+                <div className="py-24 text-center text-zinc-500 dark:text-zinc-400">
                   Cart is empty
                 </div>
               ) : (

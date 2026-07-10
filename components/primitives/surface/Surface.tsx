@@ -14,10 +14,11 @@ export default function Surface({
   return (
     <div
       className={cn(
-        "rounded-3xl border border-white/10 bg-white/5",
+        "rounded-3xl border border-zinc-200/70 bg-white/70",
         "backdrop-blur-xl",
-        glass && "bg-white/10",
-        hover && "hover:-translate-y-1 hover:bg-white/10",
+        "dark:border-white/10 dark:bg-white/5",
+        glass && "bg-white/85 dark:bg-white/10",
+        hover && "hover:-translate-y-1 hover:bg-white dark:hover:bg-white/10",
         className
       )}
     >

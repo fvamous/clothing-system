@@ -20,6 +20,103 @@ import type {
   CartItem,
 } from "@/types/entities/cart";
 
+const WHATSAPP_NUMBER = "6282225721133";
+
+const PAYMENT_DETAILS = [
+  {
+    label: "BRI",
+    value: "6997-0103-0623-530",
+  },
+  {
+    label: "BNI",
+    value: "1938005520",
+  },
+  {
+    label: "OCBC",
+    value: "5248053372",
+  },
+  {
+    label: "PayNow",
+    value: "88538955",
+  },
+  {
+    label: "DANA",
+    value: "0822-2572-1133",
+  },
+];
+
+const ACCOUNT_NAME =
+  "Evi Durotun Nafisah";
+
+function formatRupiah(value: number) {
+  return `Rp ${value.toLocaleString("id-ID")}`;
+}
+
+function createInvoiceNumber() {
+  const now = new Date();
+
+  const date = now
+    .toISOString()
+    .slice(0, 10)
+    .replace(/-/g, "");
+
+  const time = now
+    .toTimeString()
+    .slice(0, 8)
+    .replace(/:/g, "");
+
+  return `INV-${date}-${time}`;
+}
+
+function createWhatsAppInvoiceMessage({
+  invoiceNumber,
+  cart,
+  totalPrice,
+}: {
+  invoiceNumber: string;
+  cart: CartItem[];
+  totalPrice: number;
+}) {
+  const itemLines = cart
+    .map((item, index) => {
+      const subtotal =
+        item.price * item.quantity;
+
+      return [
+        `${index + 1}. ${item.name}`,
+        `   Qty: ${item.quantity}`,
+        `   Harga: ${formatRupiah(item.price)}`,
+        `   Subtotal: ${formatRupiah(subtotal)}`,
+      ].join("\n");
+    })
+    .join("\n\n");
+
+  const paymentLines = PAYMENT_DETAILS.map(
+    (item) => `${item.label}: ${item.value}`
+  ).join("\n");
+
+  return [
+    "Halo Clothing System, saya ingin checkout pesanan berikut.",
+    "",
+    `Invoice: ${invoiceNumber}`,
+    "",
+    "Detail Pesanan:",
+    itemLines,
+    "",
+    `Total: ${formatRupiah(totalPrice)}`,
+    "",
+    "Detail Rekening Pembayaran:",
+    `Atas Nama: ${ACCOUNT_NAME}`,
+    paymentLines,
+    "",
+    "Ketentuan:",
+    "- Konfirmasi setelah transfer dan sertakan bukti transfer.",
+    "- Keep = no cancel karena stock barang terbatas.",
+    "",
+    "Saya akan konfirmasi setelah transfer. Terima kasih.",
+  ].join("\n");
+}
+
 export default function CheckoutPage() {
   const { cart, totalPrice } =
     useCart();
@@ -29,51 +126,26 @@ export default function CheckoutPage() {
   const { isDark } =
     useSafeTheme();
 
-  async function handleCheckout() {
-    try {
-      const res = await fetch(
-        "/api/checkout",
-        {
-          method: "POST",
+  function handleCheckout() {
+    const invoiceNumber =
+      createInvoiceNumber();
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+    const message =
+      createWhatsAppInvoiceMessage({
+        invoiceNumber,
+        cart,
+        totalPrice,
+      });
 
-          body: JSON.stringify({
-            items: cart.map(
-              (
-                item: CartItem
-              ) => ({
-                productId:
-                  item.productId,
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+      message
+    )}`;
 
-                quantity:
-                  item.quantity,
-              })
-            ),
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(
-          data.error ||
-            "Checkout failed"
-        );
-
-        return;
-      }
-
-      router.push(
-        `/success/${data.orderId}`
-      );
-    } catch {
-      alert("Checkout failed");
-    }
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   if (cart.length === 0) {
@@ -427,6 +499,82 @@ export default function CheckoutPage() {
               </span>
             </div>
 
+            <div
+              style={{
+                ...styles.paymentBox,
+
+                background: isDark
+                  ? "rgba(255,255,255,0.04)"
+                  : "rgba(255,255,255,0.62)",
+
+                border: isDark
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : "1px solid rgba(15,23,42,0.08)",
+              }}
+            >
+              <h3
+                style={{
+                  ...styles.paymentTitle,
+
+                  color: isDark
+                    ? "#fff"
+                    : "#111",
+                }}
+              >
+                Detail Pembayaran
+              </h3>
+
+              <p
+                style={{
+                  ...styles.paymentOwner,
+
+                  color: isDark
+                    ? "#cbd5e1"
+                    : "#475569",
+                }}
+              >
+                a.n {ACCOUNT_NAME}
+              </p>
+
+              <div style={styles.paymentList}>
+                {PAYMENT_DETAILS.map(
+                  (item) => (
+                    <div
+                      key={item.label}
+                      style={{
+                        ...styles.paymentRow,
+
+                        color: isDark
+                          ? "#e2e8f0"
+                          : "#334155",
+                      }}
+                    >
+                      <span>
+                        {item.label}
+                      </span>
+
+                      <strong>
+                        {item.value}
+                      </strong>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+
+            <p
+              style={{
+                ...styles.terms,
+
+                color: isDark
+                  ? "#94a3b8"
+                  : "#64748b",
+              }}
+            >
+              Konfirmasi setelah transfer dan sertakan bukti transfer. Keep =
+              no cancel karena stock barang terbatas.
+            </p>
+
             <button
               onClick={
                 handleCheckout
@@ -444,7 +592,7 @@ export default function CheckoutPage() {
               }}
             >
               <CreditCard size={16} />
-              Pay Now
+              Pay Now via WhatsApp
             </button>
           </aside>
         </div>
@@ -589,7 +737,7 @@ const styles: Record<
   },
 
   checkoutBtn: {
-    marginTop: 22,
+    marginTop: 20,
     width: "100%",
     height: 52,
     display: "flex",
@@ -600,6 +748,43 @@ const styles: Record<
     fontWeight: 800,
     border: "none",
     cursor: "pointer",
+  },
+
+  paymentBox: {
+    marginTop: 22,
+    padding: 18,
+    borderRadius: 28,
+  },
+
+  paymentTitle: {
+    fontSize: 14,
+    fontWeight: 900,
+    marginBottom: 4,
+  },
+
+  paymentOwner: {
+    fontSize: 12,
+    marginBottom: 12,
+  },
+
+  paymentList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+  },
+
+  paymentRow: {
+    display: "flex",
+    justifyContent:
+      "space-between",
+    gap: 12,
+    fontSize: 13,
+  },
+
+  terms: {
+    marginTop: 14,
+    fontSize: 12,
+    lineHeight: 1.6,
   },
 
   emptyCard: {

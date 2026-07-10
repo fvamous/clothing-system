@@ -16,11 +16,11 @@ export default function BrandStory() {
       "
     >
       <div>
-        <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">
+        <p className="text-xs uppercase tracking-[0.28em] text-zinc-500 dark:text-zinc-400">
           Our DNA
         </p>
 
-        <h2 className="mt-4 text-4xl font-bold tracking-tight">
+        <h2 className="mt-4 text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
           Minimal fashion.
           <br />
           modern system.

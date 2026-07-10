@@ -6,6 +6,7 @@ import Navbar from "@/components/navigation/Navbar";
 
 import BackgroundLayers from "./BackgroundLayers";
 import MobileDock from "./MobileDock";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 export default function StorefrontShell({
   children,
@@ -24,6 +25,8 @@ export default function StorefrontShell({
       </main>
 
       <MobileDock />
+
+      <CartDrawer />
 
     </div>
   );

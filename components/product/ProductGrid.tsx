@@ -16,6 +16,7 @@ export default function ProductGrid({
           py-24
           text-center
           text-zinc-500
+          dark:text-zinc-400
         "
       >
         Produk belum tersedia

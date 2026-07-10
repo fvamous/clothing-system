@@ -16,14 +16,19 @@ export default function CartSummary() {
         space-y-5
         rounded-[32px]
         border
-        border-white/10
-        bg-white/5
+        border-zinc-200/70
+        bg-white/70
         p-6
+        text-zinc-950
+        shadow-sm
         backdrop-blur-xl
+        dark:border-white/10
+        dark:bg-white/5
+        dark:text-white
       "
     >
       <div className="flex items-center justify-between">
-        <span className="text-zinc-500">
+        <span className="text-zinc-500 dark:text-zinc-400">
           Total Items
         </span>
 
@@ -31,7 +36,7 @@ export default function CartSummary() {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-zinc-500">
+        <span className="text-zinc-500 dark:text-zinc-400">
           Total Price
         </span>
 

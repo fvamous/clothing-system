@@ -41,6 +41,7 @@ export default function Hero() {
             uppercase
             tracking-[0.28em]
             text-zinc-500
+            dark:text-zinc-400
           "
         >
           Modern Fashion System
@@ -107,7 +108,9 @@ export default function Hero() {
               py-3
               text-sm
               font-medium
+              text-zinc-900
               dark:border-zinc-700
+              dark:text-zinc-100
             "
           >
             Brand Story

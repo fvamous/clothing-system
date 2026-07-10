@@ -26,9 +26,14 @@ export default function CartItem({
         gap-4
         rounded-3xl
         border
-        border-white/10
-        bg-white/5
+        border-zinc-200/70
+        bg-white/70
         p-4
+        text-zinc-950
+        shadow-sm
+        dark:border-white/10
+        dark:bg-white/5
+        dark:text-white
       "
     >
       <div
@@ -59,6 +64,7 @@ export default function CartItem({
               justify-center
               text-xs
               text-zinc-400
+              dark:text-zinc-500
             "
           >
             No Image
@@ -71,7 +77,7 @@ export default function CartItem({
           {item.name}
         </h3>
 
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           Rp{" "}
           {item.price.toLocaleString(
             "id-ID"

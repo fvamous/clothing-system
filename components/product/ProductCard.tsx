@@ -72,6 +72,7 @@ export default function ProductCard({
                 justify-center
                 text-sm
                 text-zinc-400
+                dark:text-zinc-500
               "
             >
               No Image
@@ -87,6 +88,7 @@ export default function ProductCard({
                 uppercase
                 tracking-[0.24em]
                 text-zinc-500
+                dark:text-zinc-400
               "
             >
               {product.category.name}

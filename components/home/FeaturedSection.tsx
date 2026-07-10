@@ -25,6 +25,7 @@ export default function FeaturedSection({
               uppercase
               tracking-[0.24em]
               text-zinc-500
+              dark:text-zinc-400
             "
           >
             Featured
@@ -36,6 +37,8 @@ export default function FeaturedSection({
               text-3xl
               font-bold
               tracking-tight
+              text-zinc-900
+              dark:text-white
             "
           >
             Selected Products

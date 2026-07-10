@@ -55,11 +55,17 @@ export default function CatalogClient({
             w-full
             rounded-2xl
             border
-            border-white/10
-            bg-white/5
+            border-zinc-200/70
+            bg-white/70
             px-4
+            text-zinc-950
             outline-none
+            placeholder:text-zinc-400
             backdrop-blur-xl
+            dark:border-white/10
+            dark:bg-white/5
+            dark:text-white
+            dark:placeholder:text-zinc-500
           "
         />
 

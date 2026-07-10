@@ -11,15 +11,21 @@ const Textarea = forwardRef<
       ref={ref}
       className={cn(
         "min-h-[140px] w-full rounded-2xl",
-        "border border-white/10",
-        "bg-white/5",
+        "border border-zinc-200/70",
+        "bg-white/80",
         "p-4",
-        "text-sm text-white",
+        "text-sm text-zinc-950",
         "outline-none",
         "transition-all duration-200",
-        "placeholder:text-white/30",
-        "focus:border-white/20",
-        "focus:bg-white/10",
+        "placeholder:text-zinc-400",
+        "focus:border-zinc-400",
+        "focus:bg-white",
+        "dark:border-white/10",
+        "dark:bg-white/5",
+        "dark:text-white",
+        "dark:placeholder:text-white/30",
+        "dark:focus:border-white/20",
+        "dark:focus:bg-white/10",
         className
       )}
       {...props}

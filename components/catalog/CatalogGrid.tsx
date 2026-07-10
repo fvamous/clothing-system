@@ -22,6 +22,8 @@ export default function CatalogGrid({
           className="
             text-2xl
             font-bold
+            text-zinc-900
+            dark:text-white
           "
         >
           Catalog
@@ -31,6 +33,7 @@ export default function CatalogGrid({
           className="
             text-sm
             text-zinc-500
+            dark:text-zinc-400
           "
         >
           {products.length} products
