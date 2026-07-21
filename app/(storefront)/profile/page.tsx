@@ -8,7 +8,10 @@ import Link from "next/link";
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
   const user = session?.user;
-  const isAdmin = (user as any)?.role === "ADMIN";
+  
+  // Menggunakan casting record aman pengganti 'any'
+  const userRole = (user as Record<string, unknown>)?.role as string | undefined;
+  const isAdmin = userRole === "ADMIN";
 
   // Jika SUDAH login, tampilkan informasi akun, foto profil, dan opsi khusus
   if (session) {
@@ -44,7 +47,7 @@ export default async function ProfilePage() {
 
         <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 mb-6 space-y-2 text-sm text-neutral-300">
           <p><strong className="text-neutral-400">Email:</strong> {user?.email}</p>
-          <p><strong className="text-neutral-400">Database Role:</strong> {(user as any)?.role || "USER"}</p>
+          <p><strong className="text-neutral-400">Database Role:</strong> {userRole || "USER"}</p>
         </div>
 
         <div className="flex flex-wrap gap-3">
