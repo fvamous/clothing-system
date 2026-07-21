@@ -2,6 +2,8 @@ import {
   Package2,
   ShoppingCart,
   Wallet,
+  LogOut,
+  User,
 } from "lucide-react";
 
 import { prisma } from "@/lib/infra/prisma/client";
@@ -11,6 +13,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/infra/auth/authOptions";
 
 import { redirect } from "next/navigation";
+
+import Image from "next/image";
+
+import Link from "next/link";
 
 export default async function AdminPage() {
   const session =
@@ -87,33 +93,68 @@ export default async function AdminPage() {
   return (
     <main className="space-y-6 lg:space-y-8">
       {/* ================= HEADER ================= */}
-      <div className="space-y-2">
-        <h1
-          className="
-            text-2xl
-            font-bold
-            tracking-tight
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-2">
+          <h1
+            className="
+              text-2xl
+              font-bold
+              tracking-tight
 
-            text-slate-900
-            dark:text-white
+              text-slate-900
+              dark:text-white
 
-            sm:text-3xl
-          "
-        >
-          Admin Dashboard
-        </h1>
+              sm:text-3xl
+            "
+          >
+            Admin Dashboard
+          </h1>
 
-        <p
-          className="
-            text-sm
+          <p
+            className="
+              text-sm
 
-            text-slate-600
-            dark:text-slate-400
-          "
-        >
-          Welcome back,{" "}
-          {session.user.name}
-        </p>
+              text-slate-600
+              dark:text-slate-400
+            "
+          >
+            Welcome back,{" "}
+            {session.user.name}
+          </p>
+        </div>
+
+        {/* PROFIL GOOGLE & TOMBOL LOGOUT */}
+        <div className="flex items-center gap-3 bg-white/85 dark:bg-white/[0.055] border border-slate-200/80 dark:border-white/10 p-2.5 rounded-2xl backdrop-blur-2xl shadow-sm self-start sm:self-auto">
+          {session.user.image ? (
+            <Image
+              src={session.user.image}
+              alt={session.user.name || "Admin"}
+              width={38}
+              height={38}
+              className="rounded-full border border-slate-300 dark:border-white/20"
+            />
+          ) : (
+            <div className="p-2 bg-slate-200 dark:bg-white/10 rounded-full">
+              <User className="w-5 h-5 text-slate-700 dark:text-white" />
+            </div>
+          )}
+          <div className="hidden md:block text-left mr-2">
+            <p className="text-xs font-semibold text-slate-900 dark:text-white truncate max-w-[120px]">
+              {session.user.name}
+            </p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">
+              {session.user.email}
+            </p>
+          </div>
+          <Link
+            href="/api/auth/signout"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-medium rounded-xl transition-all"
+            title="Logout"
+          >
+            <LogOut size={15} />
+            <span className="hidden sm:inline">Logout</span>
+          </Link>
+        </div>
       </div>
 
       {/* ================= STATS ================= */}

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 import {
   Heart,
@@ -18,6 +20,9 @@ type NavbarActionProps = {
 export default function NavbarAction({
   cartCount = 0,
 }: NavbarActionProps) {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   return (
     <div
       className="
@@ -141,6 +146,7 @@ export default function NavbarAction({
             w-11
             items-center
             justify-center
+            overflow-hidden
             rounded-2xl
             border
             border-zinc-200/70
@@ -155,7 +161,17 @@ export default function NavbarAction({
             dark:text-zinc-200
           "
         >
-          <User2 className="h-5 w-5" />
+          {user?.image ? (
+            <Image
+              src={user.image}
+              alt={user.name || "Profile"}
+              width={44}
+              height={44}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <User2 className="h-5 w-5" />
+          )}
         </button>
       </Link>
     </div>
